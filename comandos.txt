@@ -1,0 +1,13 @@
+source virtualenv_musicpro/Scripts/activate
+
+CREATE DATABASE musicprodb;
+USE musicprodb;
+
+CREATE TABLE productos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre_producto VARCHAR(255) NOT NULL,
+  marca_producto VARCHAR(255) NOT NULL,
+  color_producto VARCHAR(255) NOT NULL,
+  precio_producto DECIMAL(10, 2) NOT NULL,
+  imagen_producto VARCHAR(255) NOT NULL
+);
