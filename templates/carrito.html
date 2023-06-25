@@ -1,0 +1,15 @@
+<!-- carrito.html -->
+<h3>Carrito de Compras</h3>
+{% if carrito %}
+    <ul>
+        {% for producto_id, producto in carrito.items() %}
+            <li>{{ producto.nombre }} - ${{ producto.precio }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No hay productos en el carrito.</p>
+{% endif %}
+
+<!-- Aquí puedes agregar más funcionalidades al carrito, como eliminar productos, modificar cantidades, etc. -->
+
+<a href="{{ url_for('mostrar_productos') }}">Volver al catálogo</a>

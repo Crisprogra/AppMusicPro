@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session, url_for, redirect
 from models import Producto
 from database import create_product_table, add_producto, get_productos,update_producto,delete_producto,get_producto_by_id, create_table_tipo_usuario, create_table_usuario
 from Api_Transbank import header_request_transbank
@@ -7,9 +7,10 @@ import requests
 from transbank.webpay.webpay_plus.transaction import Transaction
 from transbank.error.transbank_error import TransbankError
 
+app = Flask(__name__)
+app.secret_key = '123'
 Transaction.commerce_code = "tu_codigo_de_comercio"
 Transaction.api_key = "tu_llave_secreta"
-app = Flask(__name__)
 
 # Configuración de la base de datos MySQL
 app.config['MYSQL_HOST'] = 'localhost'
@@ -20,10 +21,9 @@ app.config['MYSQL_DB'] = 'musicprodb'
 # Ruta principal - Catálogo de productos
 @app.route('/')
 def mostrar_productos():
-   
     productos = get_productos()
-    return render_template('catalogo.html', productos=productos)
-
+    carrito = session.get('carrito', {})
+    return render_template('catalogo.html', productos=productos, carrito=carrito)
 # Ruta para mostrar  catalogo al mantenedor
 @app.route('/mantenedor')
 def mostrar_mantenedor():
@@ -115,9 +115,51 @@ def modificar(id_producto):
                            imagen=producto.imagen_producto, producto=producto,
                            endpoint='modificar', action='Modificar')
 
-    
+@app.route('/carrito', methods=['GET', 'POST'])
+def carrito():
+    # Obtener el carrito de compras de la sesión del usuario
+    carrito = session.get('carrito', {})
 
+    if request.method == 'POST':
+        # Obtener los detalles del producto que se desea agregar al carrito
+        producto_id = request.form.get('producto_id')
+        nombre = request.form.get('nombre')
+        precio = (request.form.get('precio'))
 
+        # Agregar el producto al carrito
+        carrito[producto_id] = {'nombre': nombre, 'precio': precio}
+
+        # Guardar el carrito actualizado en la sesión
+        session['carrito'] = carrito
+
+        # Redirigir al usuario de regreso al catálogo de productos
+        return redirect(url_for('mostrar_productos'))
+
+    return render_template('carrito.html', carrito=carrito)
+
+@app.route('/agregar_carrito', methods=['GET','POST'])
+def agregar_carrito():
+    # Obtener los detalles del producto que se desea agregar al carrito
+    producto_id = request.form.get('producto_id')
+    nombre = request.form.get('nombre')
+    precio = request.form.get('precio')
+
+    # Verificar si alguno de los valores es None
+    if producto_id is None or nombre is None or precio is None:
+        # Manejar el error de manera apropiada, por ejemplo, redirigir a una página de error
+        return render_template('error.html', mensaje='Los detalles del producto son inválidos.')
+
+    # Obtener el carrito de compras de la sesión del usuario
+    carrito = session.get('carrito', {})
+
+    # Agregar el producto al carrito
+    carrito[producto_id] = {'nombre': nombre, 'precio': precio}
+
+    # Guardar el carrito actualizado en la sesión
+    session['carrito'] = carrito
+
+    # Redirigir al usuario nuevamente al catálogo de productos
+    return redirect(url_for('mostrar_productos'))
 
 
 if __name__ == '__main__':
