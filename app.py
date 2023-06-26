@@ -4,13 +4,13 @@ from database import create_product_table, add_producto, get_productos,update_pr
 from Api_Transbank import header_request_transbank
 from flask_mysqldb import MySQL
 import requests
-from transbank.webpay.webpay_plus.transaction import Transaction
-from transbank.error.transbank_error import TransbankError
+# from transbank.webpay.webpay_plus.transaction import Transaction
+# from transbank.error.transbank_error import TransbankError
 
 app = Flask(__name__)
 app.secret_key = '123'
-Transaction.commerce_code = "tu_codigo_de_comercio"
-Transaction.api_key = "tu_llave_secreta"
+# Transaction.commerce_code = "tu_codigo_de_comercio"
+# Transaction.api_key = "tu_llave_secreta"
 
 # Configuración de la base de datos MySQL
 app.config['MYSQL_HOST'] = 'localhost'
@@ -30,12 +30,15 @@ def mostrar_productos():
     productos = get_productos()
     carrito = session.get('carrito', {})
     return render_template('catalogo.html', productos=productos, carrito=carrito)
+
+
 # Ruta para mostrar  catalogo al mantenedor
 @app.route('/mantenedor')
 def mostrar_mantenedor():
     # Código para obtener la lista de productos para el mantenedor
     productos = get_productos()
     return render_template('mantenedor.html', productos=productos)
+
 
 # Ruta para insertar un producto
 @app.route('/insertar', methods=['GET', 'POST'])
@@ -47,30 +50,27 @@ def insertar():
         color_producto = request.form['color_producto']
         precio_producto = request.form['precio_producto']
         imagen_producto = request.form['imagen_producto']
-
         producto = Producto(id_producto, nombre_producto, marca_producto, color_producto, precio_producto, imagen_producto)
         add_producto(producto)
-
         return "Producto insertado exitosamente en la base de datos."
-
     return render_template('mantenedor.html', endpoint='insertar', action='Insertar')
+
 
 # Ruta para mostrar la página de búsqueda por ID
 @app.route('/buscar')
 def buscar():
     return render_template('buscar.html')
 
+
 # Ruta para obtener un producto por su ID
 @app.route('/producto', methods=['GET'])
 def obtener_producto():
     id_producto = request.args.get('id_producto')
     producto_data = get_producto_by_id(id_producto)
-
     if producto_data:
         producto = Producto(*producto_data)  # Crear objeto Producto con los valores de la tupla
     else:
         producto = None
-
     return render_template('buscar.html', producto=producto)
 
 
@@ -82,6 +82,7 @@ def eliminar(id_producto):
         return "Producto eliminado exitosamente de la base de datos."
     return render_template('mantenedor.html')
 
+
 # Ruta para modificar un producto
 @app.route('/modificar/<int:id_producto>', methods=['GET', 'POST'])
 def modificar(id_producto):
@@ -91,7 +92,6 @@ def modificar(id_producto):
         error_message = "No se encontró el producto con el ID especificado."
         return render_template('modificar.html', id_producto=id_producto, error_message=error_message,
                                endpoint='modificar', action='Modificar')
-
     
     if request.method == 'POST':
         # Obtener los datos del formulario
@@ -100,10 +100,8 @@ def modificar(id_producto):
         color_producto = request.form['color_producto']
         precio_producto = request.form['precio_producto']
         imagen_producto = request.form['imagen_producto']
-
         # Realizar la actualización del producto
         producto = Producto(id_producto, nombre_producto, marca_producto, color_producto, precio_producto, imagen_producto)
-
         # Validar si hay un mensaje de error
         error_message = update_producto(id_producto, producto)
         if error_message:
@@ -120,9 +118,7 @@ def modificar(id_producto):
                     producto_carrito['nombre'] = nombre_producto
                     # Actualizar los demás atributos del producto en el carrito si es necesario
             session['carrito'] = carrito
-
             return render_template('modificar.html', success_message="Producto modificado exitosamente en la base de datos.", producto=producto)
-    
     return render_template('modificar.html', id_producto=id_producto,
                            nombre=producto.nombre_producto, marca=producto.marca_producto,
                            color=producto.color_producto, precio=producto.precio_producto,
