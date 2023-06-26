@@ -75,7 +75,7 @@ def eliminar(id_producto):
         delete_producto(id_producto)
         return "Producto eliminado exitosamente de la base de datos."
     return render_template('mantenedor.html')
-# Ruta para modificar un producto
+
 # Ruta para modificar un producto
 @app.route('/modificar/<int:id_producto>', methods=['GET', 'POST'])
 def modificar(id_producto):
@@ -107,6 +107,14 @@ def modificar(id_producto):
                                    precio=precio_producto, imagen=imagen_producto, producto=producto,
                                    endpoint='modificar', action='Modificar', error_message=error_message)
         else:
+            # Actualizar el nombre del producto en el carrito si está presente
+            carrito = session.get('carrito', {})
+            for producto_id, producto_carrito in carrito.items():
+                if producto_id == str(id_producto):
+                    producto_carrito['nombre'] = nombre_producto
+                    # Actualizar los demás atributos del producto en el carrito si es necesario
+            session['carrito'] = carrito
+
             return render_template('modificar.html', success_message="Producto modificado exitosamente en la base de datos.", producto=producto)
     
     return render_template('modificar.html', id_producto=id_producto,
@@ -115,52 +123,89 @@ def modificar(id_producto):
                            imagen=producto.imagen_producto, producto=producto,
                            endpoint='modificar', action='Modificar')
 
+# Ruta para el carrito de compras
+
 @app.route('/carrito', methods=['GET', 'POST'])
 def carrito():
-    # Obtener el carrito de compras de la sesión del usuario
     carrito = session.get('carrito', {})
+    monto_total = sum(float(str(producto.get('total', '0.00')).replace(',', '').replace('.', '')) for producto in carrito.values())
 
+
+ 
     if request.method == 'POST':
-        # Obtener los detalles del producto que se desea agregar al carrito
         producto_id = request.form.get('producto_id')
-        nombre = request.form.get('nombre')
-        precio = (request.form.get('precio'))
+        accion = request.form.get('accion')
 
-        # Agregar el producto al carrito
-        carrito[producto_id] = {'nombre': nombre, 'precio': precio}
 
-        # Guardar el carrito actualizado en la sesión
-        session['carrito'] = carrito
+        if producto_id in carrito:
+            if accion == 'increment':
+                carrito[producto_id]['cantidad'] += 1
+            elif accion == 'decrement':
+                carrito[producto_id]['cantidad'] -= 1
+                if carrito[producto_id]['cantidad'] < 1:
+                    carrito[producto_id]['cantidad'] = 1
 
-        # Redirigir al usuario de regreso al catálogo de productos
-        return redirect(url_for('mostrar_productos'))
+            carrito[producto_id]['total'] = carrito[producto_id]['precio'] * carrito[producto_id]['cantidad']
+            session['carrito'] = carrito
 
-    return render_template('carrito.html', carrito=carrito)
+    return render_template('carrito.html', carrito=carrito, monto_total=monto_total)
 
-@app.route('/agregar_carrito', methods=['GET','POST'])
-def agregar_carrito():
-    # Obtener los detalles del producto que se desea agregar al carrito
+
+
+# Ruta para agregar un producto al carrito
+@app.route('/agregar_al_carrito', methods=['POST'])
+def agregar_al_carrito():
     producto_id = request.form.get('producto_id')
-    nombre = request.form.get('nombre')
-    precio = request.form.get('precio')
+    producto_nombre = request.form.get('nombre')
+    producto_precio = float(request.form.get('precio'))
 
-    # Verificar si alguno de los valores es None
-    if producto_id is None or nombre is None or precio is None:
-        # Manejar el error de manera apropiada, por ejemplo, redirigir a una página de error
-        return render_template('error.html', mensaje='Los detalles del producto son inválidos.')
-
-    # Obtener el carrito de compras de la sesión del usuario
     carrito = session.get('carrito', {})
+    if producto_id in carrito:
+        carrito[producto_id]['cantidad'] += 1
+        carrito[producto_id]['total'] = carrito[producto_id]['precio'] * carrito[producto_id]['cantidad']
+    else:
+        carrito[producto_id] = {
+            'nombre': producto_nombre,
+            'precio': producto_precio,
+            'cantidad': 1,
+            'total': producto_precio
+        }
 
-    # Agregar el producto al carrito
-    carrito[producto_id] = {'nombre': nombre, 'precio': precio}
-
-    # Guardar el carrito actualizado en la sesión
     session['carrito'] = carrito
-
-    # Redirigir al usuario nuevamente al catálogo de productos
     return redirect(url_for('mostrar_productos'))
 
+
+# Ruta para actualizar cantidad del producto en el carrito
+@app.route('/actualizar_cantidad_carrito', methods=['POST'])
+def actualizar_cantidad_carrito():
+    producto_id = request.form.get('producto_id')
+    accion = request.form.get('accion')
+
+    carrito = session.get('carrito', {})
+    if producto_id in carrito:
+        if accion == 'decrement':
+            carrito[producto_id]['cantidad'] -= 1
+            if carrito[producto_id]['cantidad'] < 1:
+                carrito[producto_id]['cantidad'] = 1
+        elif accion == 'increment':
+            carrito[producto_id]['cantidad'] += 1
+        carrito[producto_id]['total'] = carrito[producto_id]['precio'] * carrito[producto_id]['cantidad']
+
+    session['carrito'] = carrito
+    return redirect(url_for('carrito'))
+
+
+# Ruta para eliminar producto del carrito
+@app.route('/eliminar_producto_carrito', methods=['POST'])
+def eliminar_producto_carrito():
+    producto_id = request.form.get('producto_id')
+
+    carrito = session.get('carrito', {})
+    if producto_id in carrito:
+        del carrito[producto_id]
+        session['carrito'] = carrito
+
+    return redirect(url_for('carrito'))
 
 if __name__ == '__main__':
     # Crear la tabla de productos si no existe

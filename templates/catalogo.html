@@ -31,7 +31,7 @@
                                 <p class="card-text">Marca: {{ producto.marca_producto }}</p>
                                 <p class="card-text">Color: {{ producto.color_producto }}</p>
                                 <p class="card-text">Precio: ${{ producto.precio_producto }}</p>
-                            <form action="{{ url_for('agregar_carrito') }}" method="post">
+                            <form action="{{ url_for('agregar_al_carrito') }}" method="post">
                                 <input type="hidden" name="producto_id" value="{{ producto.id_producto }}">
                                 <input type="hidden" name="nombre" value="{{ producto.nombre_producto}}">
                                 <input type="hidden" name="precio" value="{{ producto.precio_producto }}">
