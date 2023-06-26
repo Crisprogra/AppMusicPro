@@ -18,6 +18,12 @@ app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'password'
 app.config['MYSQL_DB'] = 'musicprodb'
 
+# Función para establecer la conexión a la base de datos y seleccionar la base de datos
+def conectar_db():
+    mysql = MySQL(app)
+    return mysql.connection
+
+
 # Ruta principal - Catálogo de productos
 @app.route('/')
 def mostrar_productos():
@@ -208,6 +214,10 @@ def eliminar_producto_carrito():
     return redirect(url_for('carrito'))
 
 if __name__ == '__main__':
+    
+    # Establecer la conexión a la base de datos y seleccionar la base de datos
+    connection = conectar_db()
+
     # Crear la tabla de productos si no existe
     create_product_table()
     create_table_tipo_usuario()
