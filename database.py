@@ -256,3 +256,75 @@ def delete_producto(id_producto):
         connection.close()
     except mysql.connector.Error as error:
         print("Error al eliminar el producto:", error)
+
+#funcion para crear tabla de facturas para el contador
+def create_table_factura_contador():
+    try:
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="password",
+            database="musicprodb"
+        )
+        cursor = connection.cursor()
+
+        try:
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS factura_contador (
+                    id_factura INT AUTO_INCREMENT PRIMARY KEY,
+                    numero_sesion INT,
+                    monto_total DECIMAL(10, 2),
+                    fecha_emision DATE,
+                    -- Otros campos de la factura contable
+                )
+            ''')
+            print("Tabla factura_contador creada exitosamente.")
+
+        except mysql.connector.Error as error:
+            print("Error al crear la tabla factura_contador:", error)
+
+        connection.commit()
+
+    except mysql.connector.Error as error:
+        print("Error al crear la tabla factura_contador:", error)
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+# Funcion para crear la tabla de facturas para bodega
+def create_table_factura_bodega():
+    try:
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="password",
+            database="musicprodb"
+        )
+        cursor = connection.cursor()
+
+        try:
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS factura_bodega (
+                    id_factura INT AUTO_INCREMENT PRIMARY KEY,
+                    numero_sesion INT,
+                    monto_total DECIMAL(10, 2),
+                    fecha_emision DATE,
+                    -- Otros campos de la factura de bodega
+                )
+            ''')
+            print("Tabla factura_bodega creada exitosamente.")
+
+        except mysql.connector.Error as error:
+            print("Error al crear la tabla factura_bodega:", error)
+
+        connection.commit()
+
+    except mysql.connector.Error as error:
+        print("Error al crear la tabla factura_bodega:", error)
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()

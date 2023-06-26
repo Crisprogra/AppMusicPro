@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, session, url_for, redirect
 from models import Producto
-from database import create_product_table, add_producto, get_productos,update_producto,delete_producto,get_producto_by_id, create_table_tipo_usuario, create_table_usuario
+from database import create_product_table, add_producto, get_productos,update_producto,delete_producto,get_producto_by_id, create_table_tipo_usuario, create_table_usuario,create_table_factura_bodega,create_table_factura_contador
 from Api_Transbank import header_request_transbank
 from flask_mysqldb import MySQL
 import requests
@@ -222,6 +222,8 @@ if __name__ == '__main__':
     create_product_table()
     create_table_tipo_usuario()
     create_table_usuario()
+    create_table_factura_contador()
+    create_table_factura_bodega()
     
   
     app.run(debug=True)
