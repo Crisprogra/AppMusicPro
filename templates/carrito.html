@@ -1,15 +1,50 @@
-<!-- carrito.html -->
-<h3>Carrito de Compras</h3>
-{% if carrito %}
-    <ul>
-        {% for producto_id, producto in carrito.items() %}
-            <li>{{ producto.nombre }} - ${{ producto.precio }}</li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No hay productos en el carrito.</p>
-{% endif %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Carrito de Compras</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .quantity-form {
+            display: inline-flex;
+            align-items: center;
+        }
+        .quantity-input {
+            width: 40px;
+            text-align: center;
+        }
+        .quantity-button {
+            margin: 0 5px;
+            padding: 2px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h3>Carrito de Compras</h3>
+    {% if carrito %}
+        <ul>
+            {% for producto_id, producto in carrito.items() %}
+                <li>
+                    {{ producto.nombre }} - ${{ producto.precio }} - Cantidad:
+                    <form class="quantity-form" action="{{ url_for('actualizar_cantidad_carrito') }}" method="post">
+                        <input type="hidden" name="producto_id" value="{{ producto_id }}">
+                        <button class="quantity-button" type="submit" name="accion" value="decrement">-</button>
+                        <input class="quantity-input" type="number" name="cantidad" value="{{ producto.cantidad }}" min="1">
+                        <button class="quantity-button" type="submit" name="accion" value="increment">+</button>
+                    </form>
+                    
+                    <form action="{{ url_for('eliminar_producto_carrito') }}" method="post" style="display: inline;">
+                        <input type="hidden" name="producto_id" value="{{ producto_id }}">
+                        <button type="submit">Eliminar</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+        <p>Monto Total: ${{ monto_total }}</p>
+    {% else %}
+        <p>No hay productos en el carrito.</p>
+    {% endif %}
 
-<!-- Aquí puedes agregar más funcionalidades al carrito, como eliminar productos, modificar cantidades, etc. -->
-
-<a href="{{ url_for('mostrar_productos') }}">Volver al catálogo</a>
+    <a href="{{ url_for('mostrar_productos') }}">Volver al catálogo</a>
+</body>
+</html>
