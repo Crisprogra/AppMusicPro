@@ -61,14 +61,16 @@ def conectar_db():
 def mostrar_productos():
     productos = get_productos()
     carrito = session.get("carrito", {})
-    nombre_usuario = session.get(
-        "usuario", ""
+    nombre_usuario = session.get("usuario", "")
+    monto_total = session.get(
+        "monto_total", ""
     )  # Obtener el nombre de usuario de la sesión
     return render_template(
         "index.html",
         productos=productos,
         carrito=carrito,
         nombre_usuario=nombre_usuario,
+        monto_total=monto_total,
     )
 
 
@@ -220,6 +222,7 @@ def modificar(id_producto):
 def carrito():
     carrito = session.get("carrito", {})
     nombre_usuario = session.get("usuario", "")
+
     # Validar si los datos en la sesión tienen la estructura esperada
     if not isinstance(carrito, dict):
         # Redirigir a una página de error o realizar alguna otra acción adecuada
@@ -231,7 +234,7 @@ def carrito():
         if isinstance(producto, dict)
         and isinstance(producto.get("total"), (int, float))
     )
-
+    session["monto_total"] = monto_total
     if request.method == "POST":
         producto_id = request.form.get("producto_id")
         accion = request.form.get("accion")
@@ -402,7 +405,7 @@ def generar_id_factura():
 
 
 # Ruta para el retorno desde Transbank y generación de facturas
-@app.route("/retorno-transbank", methods=["POST"])
+@app.route("/retorno-transbank", methods=["GET", "POST"])
 def retorno_transbank():
     # Simulación de retorno desde Transbank y ejecución de la generación de facturas
     # Aquí se realizarían las operaciones necesarias para obtener los datos de la transacción
