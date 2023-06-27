@@ -44,7 +44,15 @@
     {% else %}
         <p>No hay productos en el carrito.</p>
     {% endif %}
-
+    
+    <br>
     <a href="{{ url_for('mostrar_productos') }}">Volver al catálogo</a>
+    <!-- Botón de Pagar -->
+    <br>
+    <br>
+    <form action="/retorno-transbank" method="post">
+        <input type="submit" value="Pagar">
+    </form> 
 </body>
 </html>
+

@@ -1,6 +1,6 @@
 import mysql.connector
-from models import Producto,Usuario,TipoUsuario
-
+from models import Producto,Usuario,TipoUsuario,FacturaBodega,FacturaContador
+import json
 
 
 def create_table_tipo_usuario():
@@ -257,7 +257,9 @@ def delete_producto(id_producto):
     except mysql.connector.Error as error:
         print("Error al eliminar el producto:", error)
 
-#funcion para crear tabla de facturas para el contador
+
+# Función para crear tabla factura_contador
+# Función para crear tabla factura_contador
 def create_table_factura_contador():
     try:
         connection = mysql.connector.connect(
@@ -271,11 +273,12 @@ def create_table_factura_contador():
         try:
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS factura_contador (
-                    id_factura INT AUTO_INCREMENT PRIMARY KEY,
-                    numero_sesion INT,
-                    monto_total DECIMAL(10, 2),
-                    fecha_emision DATE,
-                    -- Otros campos de la factura contable
+                    id_factura INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                    fecha DATE,
+                    buy_order VARCHAR(255),
+                    session_id VARCHAR(255),
+                    productos_carrito TEXT,
+                    monto_total DECIMAL(10, 2)
                 )
             ''')
             print("Tabla factura_contador creada exitosamente.")
@@ -292,8 +295,80 @@ def create_table_factura_contador():
         if connection.is_connected():
             cursor.close()
             connection.close()
+# Función para guardar factura de contador
+def guardar_factura_contador(factura_contador):
+    try:
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="password",
+            database="musicprodb"
+        )
+        cursor = connection.cursor()
 
-# Funcion para crear la tabla de facturas para bodega
+        productos_json = json.dumps(factura_contador['productos_carrito'])
+
+        factura_query = """
+        INSERT INTO factura_contador (fecha, buy_order, session_id, productos_carrito, monto_total)
+        VALUES (%s, %s, %s, %s, %s)
+        """
+        factura_values = (factura_contador['fecha'], factura_contador['buy_order'], factura_contador['session_id'], productos_json, factura_contador['monto_total'])
+        cursor.execute(factura_query, factura_values)
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+
+        print("FacturaContador guardada exitosamente.")
+
+    except mysql.connector.Error as error:
+        print("Error al guardar la FacturaContador:", error)
+# Función para obtener todas las facturas de contador
+def obtener_todas_facturas_contador():
+    try:
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="password",
+            database="musicprodb"
+        )
+        cursor = connection.cursor()
+
+        query = "SELECT * FROM factura_contador"
+        cursor.execute(query)
+
+        facturas_data = cursor.fetchall()
+        facturas = []
+
+        for factura_data in facturas_data:
+            # Deserializar los productos del carrito desde el formato JSON
+            productos_carrito = json.loads(factura_data[4])
+            # Obtener el precio unitario de cada producto en el carrito
+            for producto in productos_carrito:
+                producto['precio_unitario'] = producto['precio']
+
+
+            factura = FacturaContador(
+                id_factura=factura_data[0],
+                fecha=factura_data[1],
+                buy_order=factura_data[2],
+                session_id=factura_data[3],
+                productos_carrito=productos_carrito,
+                monto_total=factura_data[5]
+            )
+            facturas.append(factura)
+
+        cursor.close()
+        connection.close()
+
+        return facturas
+
+    except mysql.connector.Error as error:
+        print("Error al obtener las facturas del contador:", error)
+
+
+# Función para crear tabla factura_bodega
+# Función para crear tabla factura_bodega
 def create_table_factura_bodega():
     try:
         connection = mysql.connector.connect(
@@ -307,11 +382,12 @@ def create_table_factura_bodega():
         try:
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS factura_bodega (
-                    id_factura INT AUTO_INCREMENT PRIMARY KEY,
-                    numero_sesion INT,
-                    monto_total DECIMAL(10, 2),
-                    fecha_emision DATE,
-                    -- Otros campos de la factura de bodega
+                    id_factura INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                    fecha DATE,
+                    buy_order VARCHAR(255),
+                    session_id VARCHAR(255),
+                    productos_carrito TEXT,
+                    monto_total DECIMAL(10, 2)
                 )
             ''')
             print("Tabla factura_bodega creada exitosamente.")
@@ -328,3 +404,76 @@ def create_table_factura_bodega():
         if connection.is_connected():
             cursor.close()
             connection.close()
+# Función para guardar factura de bodega
+# Función para guardar factura de bodega
+def guardar_factura_bodega(factura_bodega):
+    try:
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="password",
+            database="musicprodb"
+        )
+        cursor = connection.cursor()
+
+        productos_json = json.dumps(factura_bodega['productos_carrito'])
+
+        factura_query = """
+        INSERT INTO factura_bodega (fecha, buy_order, session_id, productos_carrito, monto_total)
+        VALUES (%s, %s, %s, %s, %s)
+        """
+        factura_values = (factura_bodega['fecha'], factura_bodega['buy_order'], factura_bodega['session_id'], productos_json, factura_bodega['monto_total'])
+        cursor.execute(factura_query, factura_values)
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+
+        print("FacturaBodega guardada exitosamente.")
+
+    except mysql.connector.Error as error:
+        print("Error al guardar la FacturaBodega:", error)
+
+#Función para obtener todas las facturas de bodega
+def obtener_todas_facturas_bodega():
+    try:
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="password",
+            database="musicprodb"
+        )
+        cursor = connection.cursor()
+
+        query = "SELECT * FROM factura_bodega"
+        cursor.execute(query)
+
+        facturas_data = cursor.fetchall()
+        facturas = []
+
+        for factura_data in facturas_data:
+            # Deserializar los productos del carrito desde el formato JSON
+            productos_carrito = json.loads(factura_data[4])
+
+             # Obtener el precio unitario de cada producto en el carrito
+            for producto in productos_carrito:
+                producto['precio_unitario'] = producto['precio']
+
+
+            factura = FacturaBodega(
+                id_factura=factura_data[0],
+                fecha=factura_data[1],
+                buy_order=factura_data[2],
+                session_id=factura_data[3],
+                productos_carrito=productos_carrito,
+                monto_total=factura_data[5]
+            )
+            facturas.append(factura)
+
+        cursor.close()
+        connection.close()
+
+        return facturas
+
+    except mysql.connector.Error as error:
+        print("Error al obtener las facturas de la bodega:", error)
