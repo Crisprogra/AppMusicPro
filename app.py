@@ -21,15 +21,22 @@ from database import (
     get_producto_by_id,
     create_table_tipo_usuario,
     create_table_usuario,
-    create_table_factura_bodega,
-    create_table_factura_contador,
+    guardar_factura_bodega,
+    guardar_factura_contador,
+    obtener_todas_facturas_bodega,
+    obtener_todas_facturas_contador,
 )
 from Api_Transbank import header_request_transbank
 from flask_mysqldb import MySQL
 import requests
+import random
+import string
+import re
+from datetime import datetime
 
 # from transbank.webpay.webpay_plus.transaction import Transaction
 # from transbank.error.transbank_error import TransbankError
+from uuid import uuid4  # Im
 
 app = Flask(__name__)
 app.secret_key = "123"
@@ -212,9 +219,16 @@ def modificar(id_producto):
 def carrito():
     carrito = session.get("carrito", {})
     nombre_usuario = session.get("usuario", "")
+    # Validar si los datos en la sesión tienen la estructura esperada
+    if not isinstance(carrito, dict):
+        # Redirigir a una página de error o realizar alguna otra acción adecuada
+        return render_template("error.html")
+
     monto_total = sum(
         float(str(producto.get("total", "0.00")).replace(",", "").replace(".", ""))
         for producto in carrito.values()
+        if isinstance(producto, dict)
+        and isinstance(producto.get("total"), (int, float))
     )
 
     if request.method == "POST":
@@ -248,6 +262,22 @@ def agregar_al_carrito():
     producto_id = request.form.get("producto_id")
     producto_nombre = request.form.get("nombre")
     producto_precio = float(request.form.get("precio"))
+    buy_order = (
+        generar_buy_order()
+    )  # Generar el buy_order (puedes implementar tu propia lógica para esto)
+
+    if (
+        "session_id" not in session
+    ):  # Verificar si el session_id no está presente en la sesión
+        session["session_id"] = str(
+            uuid4()
+        )  # Generar un nuevo session_id único y asignarlo a la sesión
+
+    session_id = session["session_id"]  # Obtener el session_id de la sesión actual
+    session["buy_order"] = buy_order  # Almacenar el buy_order en la sesión
+
+    print("Session ID:", session_id)
+    print("Buy Order:", buy_order)
 
     carrito = session.get("carrito", {})
     if producto_id in carrito:
@@ -261,6 +291,8 @@ def agregar_al_carrito():
             "precio": producto_precio,
             "cantidad": 1,
             "total": producto_precio,
+            "buy_order": buy_order,
+            "session_id": session_id,
         }
 
     session["carrito"] = carrito
@@ -335,6 +367,127 @@ def logout():
     # Eliminar la información de sesión y redirigir al inicio de sesión
     session.clear()
     return redirect(url_for("mostrar_productos"))
+
+
+# Funcion para crear una orden de compra random
+
+
+def generar_buy_order():
+    # Obtener el último correlativo de buy_order de la base de datos o de alguna fuente de datos
+    # ...
+    ultimo_correlativo = 1000  # Supongamos que el último correlativo es 1000
+
+    # Generar el nuevo correlativo incrementando el último correlativo en 1
+    nuevo_correlativo = ultimo_correlativo + 1
+
+    # Formatear el correlativo con la sigla "BO" seguida de los dígitos
+    buy_order = f"BO{nuevo_correlativo}"
+
+    return buy_order
+
+
+def generar_id_factura():
+    # Obtener el último ID de factura de la base de datos o de alguna fuente de datos
+    # ...
+    ultimo_id_factura = 1000  # Supongamos que el último ID de factura es 1000
+
+    # Generar el nuevo ID de factura incrementando el último ID en 1
+    nuevo_id_factura = ultimo_id_factura + 1
+
+    # Formatear el ID de factura con las iniciales "FA" seguidas de los dígitos
+    id_factura = f"FA{nuevo_id_factura}"
+
+    return id_factura
+
+
+# Ruta para el retorno desde Transbank y generación de facturas
+# Ruta para el retorno desde Transbank y generación de facturas
+@app.route("/retorno-transbank", methods=["POST"])
+def retorno_transbank():
+    # Simulación de retorno desde Transbank y ejecución de la generación de facturas
+    # Aquí se realizarían las operaciones necesarias para obtener los datos de la transacción
+
+    # Verificar si la clave 'carrito' está presente en la sesión
+    if "carrito" in session:
+        carrito = session["carrito"]
+        # Obtener el buy_order y el session_id de la sesión
+        buy_order = session.get("buy_order")
+        session_id = session.get("session_id")
+
+        print("Session ID:", session_id)
+        print("Buy Order:", buy_order)
+        print("Productos del carrito:", carrito)
+
+        # Obtener los productos del carrito
+        productos_carrito = []
+        monto_total = 0.0
+        for producto_id, producto_info in carrito.items():
+            producto = {
+                "id": producto_id,
+                "nombre": producto_info["nombre"],
+                "precio": producto_info["precio"],
+                "cantidad": producto_info["cantidad"],
+                "total": producto_info["total"],
+            }
+            productos_carrito.append(producto)
+            monto_total += producto_info["total"]
+
+        print("Productos:", productos_carrito)
+        print("Monto total:", monto_total)
+
+        # Generar factura para el contador
+        id_factura = generar_id_factura()
+        fecha = datetime.now()  # Obtén la fecha actual
+
+        # Crear los datos de la factura del contador
+        factura_contador = {
+            "id_factura": id_factura,
+            "fecha": fecha,
+            "buy_order": buy_order,
+            "session_id": session_id,
+            "productos_carrito": productos_carrito,
+            "monto_total": monto_total,
+        }
+
+        # Llamar a la función para guardar la factura del contador en la base de datos
+        guardar_factura_contador(factura_contador)
+
+        # Generar factura para la bodega
+        id_factura = generar_id_factura()
+        fecha_emision = datetime.now()  # Obtén la fecha actual
+
+        # Crear los datos de la factura de la bodega
+        factura_bodega = {
+            "id_factura": id_factura,
+            "fecha": fecha,
+            "buy_order": buy_order,
+            "session_id": session_id,
+            "productos_carrito": productos_carrito,
+            "monto_total": monto_total,
+        }
+
+        # Llamar a la función para guardar la factura de la bodega en la base de datos
+        guardar_factura_bodega(factura_bodega)
+
+        # Redirigir a la página de éxito o mostrar un mensaje de confirmación
+        return render_template("exito.html")
+
+    # Si el carrito o los datos requeridos no están presentes, redirigir a una página de error
+    return render_template("error.html")
+
+
+# Función para renderizar las facturas de contador
+@app.route("/facturas-contador")
+def renderizar_facturas_contador():
+    facturas_contador = obtener_todas_facturas_contador()
+    return render_template("facturas_contador.html", facturas=facturas_contador)
+
+
+# Función para renderizar las facturas de bodega
+@app.route("/facturas-bodega")
+def renderizar_facturas_bodega():
+    facturas_bodega = obtener_todas_facturas_bodega()
+    return render_template("facturas_bodega.html", facturas=facturas_bodega)
 
 
 if __name__ == "__main__":

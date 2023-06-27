@@ -21,3 +21,25 @@ class TipoUsuario:
     def __init__(self, id_tipo_usuario, tipo_usuario):
         self.id_tipo_usuario = id_tipo_usuario
         self.tipo_usuario = tipo_usuario
+
+class FacturaContador:
+    def __init__(self, id_factura, buy_order, session_id, monto_total, fecha, productos_carrito):
+        self.id_factura = id_factura
+        self.buy_order = buy_order
+        self.session_id = session_id
+        self.monto_total = monto_total
+        self.fecha = fecha
+        self.productos_carrito = productos_carrito
+
+    
+    
+
+class FacturaBodega:
+    def __init__(self, id_factura,buy_order, session_id, monto_total,fecha, productos_carrito):
+        self.id_factura = id_factura
+        self.buy_order = buy_order
+        self.session_id = session_id
+        self.monto_total = monto_total
+        self.fecha = fecha
+        self.productos_carrito = productos_carrito
+       
