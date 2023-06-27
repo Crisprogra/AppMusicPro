@@ -52,7 +52,10 @@
                 <ul class="top-nav">
                     <li>
                     <a href="#"
-                        ><i class="fas fa-user-edit me-2"></i> Bienvenido, {{ nombre_usuario }}
+                        > Bienvenido, {{ nombre_usuario }}
+                    </li>
+                    <li>
+                        <a href="{{ url_for('logout') }}"><i class="fas fa-user-edit me-2"></i>Cerrar Sesión</a>
                     </li>
                 </ul>
                 </div>
