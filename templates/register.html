@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -12,13 +11,12 @@
     <link href="//fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300i,700" rel="stylesheet">
     <link href="//fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i" rel="stylesheet">
 
-    <link rel="stylesheet" href="static\css\bootstrap.min.css">
-    <link rel="stylesheet" href="static\css\all.min.css">
-    <link rel="stylesheet" href="static\css\style.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="container-fluid">
-
         <div class="row min-vh-100">
             <div class="col-12">
                 <header class="row">
@@ -28,17 +26,17 @@
                             <div class="col-auto me-auto">
                                 <ul class="top-nav">
                                     <li>
-                                        <a href="tel:+123-456-7890"><i class="fa fa-phone-square me-2"></i>+56 9 23231112</a>
+                                        <a href="tel:+123-456-7890"><i class="fa fa-phone-square me-2"></i>+123-456-7890</a>
                                     </li>
                                     <li>
-                                        <a href="mailto:mail@ecom.com"><i class="fa fa-envelope me-2"></i>mail@MusicMasterPro.cl</a>
+                                        <a href="mailto:mail@ecom.com"><i class="fa fa-envelope me-2"></i>mail@ecom.com</a>
                                     </li>
                                 </ul>
                             </div>
                             <div class="col-auto">
                                 <ul class="top-nav">
                                     <li>
-                                        <a href="register.html"><i class="fas fa-user-edit me-2"></i>Registro</a>
+                                        <a href="register.html"><i class="fas fa-user-edit me-2"></i>Register</a>
                                     </li>
                                     <li>
                                         <a href="login.html"><i class="fas fa-sign-in-alt me-2"></i>Login</a>
@@ -54,7 +52,7 @@
                         <div class="row">
                             <div class="col-lg-auto">
                                 <div class="site-logo text-center text-lg-left">
-                                    <a href="index.html">Music-Pro</a>
+                                    <a href="index.html">E-Commerce</a>
                                 </div>
                             </div>
                             <div class="col-lg-5 mx-auto mt-4 mt-lg-0">
@@ -71,7 +69,7 @@
                                 <a href="#" class="header-item">
                                     <i class="fas fa-heart me-2"></i><span id="header-favorite">0</span>
                                 </a>
-                                <a href="{{ url_for('carrito') }}" class="header-item">
+                                <a href="cart.html" class="header-item">
                                     <i class="fas fa-shopping-bag me-2"></i><span id="header-qty" class="me-3">2</span>
                                     <i class="fas fa-money-bill-wave me-2"></i><span id="header-price">$4,000</span>
                                 </a>
@@ -127,104 +125,53 @@
 
                     </div>
                     <!-- Header -->
+
                 </header>
             </div>
 
-            {% block content %}
-                <!-- Featured Products -->
-                <div class="col-12">
-                        <div class="row">
-                            <div class="col-12 py-3">
-                                <div class="row">
-                                    <div class="col-12 text-center text-uppercase">
-                                        <h2>Catálogo de Productos</h2>
-                                    </div>
-                                </div>
-                                <div class="row">
+            <div class="col-12">
+                <!-- Main Content -->
+                <div class="row">
+                    <div class="col-12 mt-3 text-center text-uppercase">
+                        <h2>Register</h2>
+                    </div>
+                </div>
 
-                                    <!-- Product -->
-                                    {% for producto in productos %}
-                                    <div class="col-lg-3 col-sm-6 my-3">
-                                        <div class="col-12 bg-white text-center h-100 product-item">
-                                            <div class="row h-100">
-                                                <div class="col-12 p-0 mb-3">
-                                                    <a href="product.html">
-                                                        <img src="{{ producto.imagen_producto }}" class="img-fluid" alt="{{ producto.nombre_producto }}">
-                                                    </a>
-                                                </div>
-                                                <div class="col-12 mb-3">
-                                                    <h5 class="card-title">{{ producto.nombre_producto }}</h5>
-                                                    <p class="card-text">Marca: {{ producto.marca_producto }}</p>
-                                                    <p class="card-text">Color: {{ producto.color_producto }}</p>
-                                                    <p class="card-text">Precio: ${{ producto.precio_producto }}</p>
-                                                    <a href="product.html" class="product-name">Sony Alpha DSLR Camera</a>
-                                                </div>
-                                
-                                                <div class="col-12 mb-3">
-                                                    <form action="{{ url_for('agregar_al_carrito') }}" method="post">
-                                                        <input type="hidden" name="producto_id" value="{{ producto.id_producto }}">
-                                                        <input type="hidden" name="nombre" value="{{ producto.nombre_producto}}">
-                                                        <input type="hidden" name="precio" value="{{ producto.precio_producto }}">
-                                                        <button class="btn btn-outline-dark" type="submit"><i class="fas fa-cart-plus me-2"></i>Agregar al carrito</button>
-                                                    </form>
-                                                </div>
-                                                <div class="col-12 mb-3 align-self-end">
-                                                    
-                                                </div>
-                                            </div>
+                <main class="row">
+                    <div class="col-lg-4 col-md-6 col-sm-8 mx-auto bg-white py-3 mb-4">
+                        <div class="row">
+                            <div class="col-12">
+                                <form>
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">Name</label>
+                                        <input type="text" id="name" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" id="email" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Password</label>
+                                        <input type="password" id="password" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="password-confirm" class="form-label">Confirm Password</label>
+                                        <input type="password" id="password-confirm" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input type="checkbox" id="agree" class="form-check-input" required>
+                                            <label for="agree" class="form-check-label ml-2">I agree to Terms and Conditions</label>
                                         </div>
                                     </div>
-                                    {% endfor %}
-                                    <!-- Product -->
-
-
-
-
-
-                                </div>
-                            </div>
-                        </div>
-                </div>
-            {% endblock %}
-                <main class="row">
-                    <!-- Featured Products -->
-                    <div class="col-12">
-                        <hr>
-                    </div>
-                    <div class="col-12 py-3 bg-light d-sm-block d-none">
-                        <div class="row">
-                            <div class="col-lg-3 col ms-auto large-holder">
-                                <div class="row">
-                                    <div class="col-auto ms-auto large-icon">
-                                        <i class="fas fa-money-bill"></i>
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-outline-dark">Register</button>
                                     </div>
-                                    <div class="col-auto me-auto large-text">
-                                        Best Price
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col large-holder">
-                                <div class="row">
-                                    <div class="col-auto ms-auto large-icon">
-                                        <i class="fas fa-truck-moving"></i>
-                                    </div>
-                                    <div class="col-auto me-auto large-text">
-                                        Fast Delivery
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col me-auto large-holder">
-                                <div class="row">
-                                    <div class="col-auto ms-auto large-icon">
-                                        <i class="fas fa-check"></i>
-                                    </div>
-                                    <div class="col-auto me-auto large-text">
-                                        Genuine Products
-                                    </div>
-                                </div>
+                                </form>
                             </div>
                         </div>
                     </div>
+
                 </main>
                 <!-- Main Content -->
             </div>
@@ -340,13 +287,12 @@
                 </footer>
                 <!-- Footer -->
             </div>
-        </div>
 
+        </div>
     </div>
 
-    <script type="text/javascript" src="../static/js/jquery.min.js"></script>
-    <script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../static/js/script.js"></script>
-    <script src="../static/scripts.js"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/script.js"></script>
 </body>
 </html>

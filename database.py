@@ -1,3 +1,5 @@
+import json
+from multiprocessing import connection
 import mysql.connector
 from models import Producto,Usuario,TipoUsuario
 
@@ -328,3 +330,37 @@ def create_table_factura_bodega():
         if connection.is_connected():
             cursor.close()
             connection.close()
+
+def obtener_usuario_contraseña(email):
+    connection = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="password",
+    database="musicprodb"
+    )
+    cursor = connection.cursor()
+    cursor.execute("SELECT password FROM usuario WHERE correo = %s", (email,))
+    result = cursor.fetchone()
+    cursor.close()
+    if result:
+        # Crear un diccionario con la contraseña y convertirlo a JSON
+        return result[0]
+    else:
+        return None
+    
+def obtener_nombre_usuario(email):
+    connection = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="password",
+    database="musicprodb"
+    )
+    cursor = connection.cursor()
+    cursor.execute("SELECT nombre_completo FROM usuario WHERE correo = %s", (email,))
+    result = cursor.fetchone()
+    cursor.close()
+
+    if result:
+        return result[0]
+    else:
+        return None

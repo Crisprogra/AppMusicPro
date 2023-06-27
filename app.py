@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, session, url_for, redirect
+import json
+from flask import Flask, jsonify, render_template, request, session, url_for, redirect, flash
 from models import Producto
-from database import create_product_table, add_producto, get_productos,update_producto,delete_producto,get_producto_by_id, create_table_tipo_usuario, create_table_usuario,create_table_factura_bodega,create_table_factura_contador
+from database import create_product_table, add_producto, get_productos, obtener_nombre_usuario, obtener_usuario_contraseña,update_producto,delete_producto,get_producto_by_id, create_table_tipo_usuario, create_table_usuario,create_table_factura_bodega,create_table_factura_contador
 from Api_Transbank import header_request_transbank
 from flask_mysqldb import MySQL
 import requests
@@ -29,8 +30,8 @@ def conectar_db():
 def mostrar_productos():
     productos = get_productos()
     carrito = session.get('carrito', {})
-    return render_template('catalogo.html', productos=productos, carrito=carrito)
-
+    nombre_usuario = session.get('usuario', '')  # Obtener el nombre de usuario de la sesión
+    return render_template('index.html', productos=productos, carrito=carrito, nombre_usuario=nombre_usuario)
 
 # Ruta para mostrar  catalogo al mantenedor
 @app.route('/mantenedor')
@@ -130,6 +131,7 @@ def modificar(id_producto):
 @app.route('/carrito', methods=['GET', 'POST'])
 def carrito():
     carrito = session.get('carrito', {})
+    nombre_usuario = session.get('usuario', '')
     monto_total = sum(float(str(producto.get('total', '0.00')).replace(',', '').replace('.', '')) for producto in carrito.values())
 
 
@@ -150,7 +152,7 @@ def carrito():
             carrito[producto_id]['total'] = carrito[producto_id]['precio'] * carrito[producto_id]['cantidad']
             session['carrito'] = carrito
 
-    return render_template('carrito.html', carrito=carrito, monto_total=monto_total)
+    return render_template('carrito.html', carrito=carrito, monto_total=monto_total, nombre_usuario=nombre_usuario)
 
 
 
@@ -208,6 +210,28 @@ def eliminar_producto_carrito():
         session['carrito'] = carrito
 
     return redirect(url_for('carrito'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        # Obtener la contraseña asociada al correo electrónico
+        stored_password = obtener_usuario_contraseña(email)
+        print(password)
+        print(stored_password)
+        # Verificar las credenciales del usuario
+        if password == stored_password:
+            session['usuario'] = obtener_nombre_usuario(email)
+            # Redirigir a la vista mostrar_productos con el nombre de usuario como parámetro
+            return redirect(url_for('mostrar_productos', nombre_usuario=session['usuario']))
+        else:
+            flash('Inicio de sesión fallido. Verifica tus credenciales.')
+            # Renderizar nuevamente la plantilla de inicio de sesión con el mensaje de flash
+            return render_template('login.html', flash_message='Inicio de sesión fallido. Verifica tus credenciales.')
+    # Mostrar el formulario de inicio de sesión
+    return render_template('login.html')
 
 if __name__ == '__main__':
     
