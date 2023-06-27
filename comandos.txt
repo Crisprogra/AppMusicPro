@@ -4,7 +4,7 @@ CREATE DATABASE musicprodb;
 USE musicprodb;
 
 CREATE TABLE productos (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_producto INT AUTO_INCREMENT PRIMARY KEY,
   nombre_producto VARCHAR(255) NOT NULL,
   marca_producto VARCHAR(255) NOT NULL,
   color_producto VARCHAR(255) NOT NULL,

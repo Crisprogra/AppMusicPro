@@ -366,7 +366,6 @@ def obtener_todas_facturas_contador():
 
 
 # Función para crear tabla factura_bodega
-# Función para crear tabla factura_bodega
 def create_table_factura_bodega():
     try:
         connection = mysql.connector.connect(
@@ -403,7 +402,6 @@ def create_table_factura_bodega():
             connection.close()
 
 
-# Función para guardar factura de bodega
 # Función para guardar factura de bodega
 def guardar_factura_bodega(factura_bodega):
     try:

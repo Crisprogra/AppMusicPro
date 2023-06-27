@@ -117,7 +117,7 @@ def obtener_producto():
     producto_data = get_producto_by_id(id_producto)
     if producto_data:
         producto = Producto(
-            *producto_data
+            *producto_data[1:]
         )  # Crear objeto Producto con los valores de la tupla
     else:
         producto = None
@@ -136,6 +136,7 @@ def eliminar(id_producto):
 # Ruta para modificar un producto
 @app.route("/modificar/<int:id_producto>", methods=["GET", "POST"])
 def modificar(id_producto):
+    print(id_producto)
     # Obtener el producto por su ID
     producto = get_producto_by_id(id_producto)
     if producto is None:
@@ -400,7 +401,6 @@ def generar_id_factura():
     return id_factura
 
 
-# Ruta para el retorno desde Transbank y generación de facturas
 # Ruta para el retorno desde Transbank y generación de facturas
 @app.route("/retorno-transbank", methods=["POST"])
 def retorno_transbank():

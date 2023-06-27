@@ -1,8 +1,4 @@
 {% extends 'index.html' %} {% block content %}
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
-/>
 <div class="col-12">
   <!-- Main Content -->
   <div class="row">
@@ -58,10 +54,4 @@
   </main>
   <!-- Main Content -->
 </div>
-{% if toast_message %}
-<script>
-  // Mostrar el toast utilizando toastr
-  toastr.error("{{ flash_message }}");
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-{% endif %} {% endblock %}
+{% endblock %}
