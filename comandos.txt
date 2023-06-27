@@ -4,10 +4,39 @@ CREATE DATABASE musicprodb;
 USE musicprodb;
 
 CREATE TABLE productos (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_producto INT AUTO_INCREMENT PRIMARY KEY,
   nombre_producto VARCHAR(255) NOT NULL,
   marca_producto VARCHAR(255) NOT NULL,
   color_producto VARCHAR(255) NOT NULL,
   precio_producto DECIMAL(10, 2) NOT NULL,
   imagen_producto VARCHAR(255) NOT NULL
 );
+
+INSERT INTO productos (nombre_producto, marca_producto, color_producto, precio_producto, imagen_producto)
+VALUES
+  ('Parlante Bluetooth', 'Sony', 'Negro', 49.99, 'https://i.ibb.co/c1mbC9h/parlante1.jpg'),
+  ('Audífonos Inalámbricos', 'JBL', 'Rojo', 79.99, 'https://i.ibb.co/4YvPgMy/audifonos1.png'),
+  ('Altavoz Portátil', 'Bose', 'Plateado', 129.99, 'https://i.ibb.co/t4KsF8S/parlante2.jpg'),
+  ('Auriculares Diadema', 'Sennheiser', 'Negro', 199.99, 'https://i.ibb.co/jHrmzDh/audifonos2.jpg'),
+  ('Parlante Inteligente', 'Amazon', 'Blanco', 89.99, 'https://i.ibb.co/jLnqVKF/parlante3.jpg'),
+  ('Auriculares Deportivos', 'Beats', 'Negro', 149.99, 'https://i.ibb.co/GpM7W9T/audifonos3.jpg'),
+  ('Sistema de Sonido Envolvente', 'Samsung', 'Gris', 299.99, 'https://i.ibb.co/dWfp1f0/parlante4.png'),
+  ('Auriculares Bluetooth', 'Jabra', 'Negro', 69.99, 'https://i.ibb.co/s9V0dtM/audifonos4.jpg'),
+  ('Parlante Resistente al Agua', 'JBL', 'Azul', 39.99, 'https://i.ibb.co/HgLQbS9/parlante5-jpg.jpg'),
+  ('Auriculares Intraurales', 'Sony', 'Blanco', 59.99, 'https://i.ibb.co/ZXJCW85/audifonos5.jpg');
+
+  INSERT INTO tipo_usuario (id_tipo_usuario, tipo_usuario)
+VALUES
+  (1, 'vendedor'),
+  (2, 'bodeguero'),
+  (3, 'contador'),
+  (4, 'cliente');
+
+  INSERT INTO usuario (id_usuario, nombre_completo, correo, password, tipo_usuario)
+VALUES
+  (1, 'vendedor1', 'vendedor1@test.com', 'testvendedor', 4),
+  (2, 'vendedor2', 'vendedor2@test.com', 'testvendedor', 4),
+  (3, 'cliente1', 'cliente1@test.com', 'testcliente', 3),
+  (4, 'cliente2', 'cliente2@test.com', 'testcliente', 3),
+  (5, 'bodeguero1', 'bodeguero1@test.com', 'testbodeguero', 2),
+  (6, 'contador1', 'contador1@test.com', 'testcontador', 1);
