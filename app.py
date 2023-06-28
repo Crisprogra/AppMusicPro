@@ -61,14 +61,14 @@ def conectar_db():
 def mostrar_productos():
     productos = get_productos()
     carrito = session.get("carrito", {})
-    nombre_usuario = session.get(
-        "usuario", ""
-    )  # Obtener el nombre de usuario de la sesión
+    nombre_usuario = session.get("usuario", "")
+    monto_total = session.get("monto_total", "")
     return render_template(
         "index.html",
         productos=productos,
         carrito=carrito,
         nombre_usuario=nombre_usuario,
+        monto_total=monto_total,
     )
 
 
@@ -220,18 +220,22 @@ def modificar(id_producto):
 def carrito():
     carrito = session.get("carrito", {})
     nombre_usuario = session.get("usuario", "")
+
     # Validar si los datos en la sesión tienen la estructura esperada
     if not isinstance(carrito, dict):
         # Redirigir a una página de error o realizar alguna otra acción adecuada
         return render_template("error.html")
 
-    monto_total = sum(
-        float(str(producto.get("total", "0.00")).replace(",", "").replace(".", ""))
-        for producto in carrito.values()
-        if isinstance(producto, dict)
-        and isinstance(producto.get("total"), (int, float))
+    monto_total = round(
+        sum(
+            producto.get("total", 0.00)
+            for producto in carrito.values()
+            if isinstance(producto, dict)
+            and isinstance(producto.get("total"), (int, float))
+        ),
+        2,
     )
-
+    session["monto_total"] = monto_total
     if request.method == "POST":
         producto_id = request.form.get("producto_id")
         accion = request.form.get("accion")
@@ -402,7 +406,7 @@ def generar_id_factura():
 
 
 # Ruta para el retorno desde Transbank y generación de facturas
-@app.route("/retorno-transbank", methods=["POST"])
+@app.route("/retorno-transbank", methods=["GET", "POST"])
 def retorno_transbank():
     # Simulación de retorno desde Transbank y ejecución de la generación de facturas
     # Aquí se realizarían las operaciones necesarias para obtener los datos de la transacción
