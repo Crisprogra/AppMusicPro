@@ -1,170 +1,155 @@
 {% extends 'index.html' %} {% block content %}
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Mantenedor de Productos</title>
-    <!-- Agrega los enlaces a los estilos de Bootstrap -->
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
-    />
-  </head>
-  <body>
-    <div class="container">
-      <h1>Mantenedor de Productos</h1>
-      <!-- Botón para abrir el modal -->
-      <button
-        type="button"
-        class="btn btn-primary"
-        data-toggle="modal"
-        data-target="#agregarProductoModal"
-      >
-        Agregar Producto
-      </button>
-
-      <!-- Modal para agregar un nuevo producto -->
-      <div
-        class="modal fade"
-        id="agregarProductoModal"
-        tabindex="-1"
-        role="dialog"
-        aria-labelledby="agregarProductoModalLabel"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="agregarProductoModalLabel">
+    <head>
+        <title>Mantenedor de Productos</title>
+        <!-- Agrega los enlaces a los estilos de Bootstrap -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" />
+    </head>
+    <body>
+        <div class="container">
+            <h1>Mantenedor de Productos</h1>
+            <!-- Botón para abrir el modal -->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#agregarProductoModal">
                 Agregar Producto
-              </h5>
-              <button
-                type="button"
-                class="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">&times;</span>
-              </button>
+            </button>
+
+            <!-- Modal para agregar un nuevo producto -->
+            <div
+                class="modal fade"
+                id="agregarProductoModal"
+                tabindex="-1"
+                role="dialog"
+                aria-labelledby="agregarProductoModalLabel"
+                aria-hidden="true"
+            >
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="agregarProductoModalLabel">Agregar Producto</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Formulario para agregar un nuevo producto -->
+                            <form method="POST" action="{{ url_for('insertar') }}">
+                                <div class="form-group">
+                                    <label for="id_producto">ID Producto:</label>
+                                    <input
+                                        type="number"
+                                        class="form-control"
+                                        id="id_producto"
+                                        name="id_producto"
+                                        required
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label for="nombre_producto">Nombre:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="nombre_producto"
+                                        name="nombre_producto"
+                                        required
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label for="marca_producto">Marca:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="marca_producto"
+                                        name="marca_producto"
+                                        required
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label for="color_producto">Color:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="color_producto"
+                                        name="color_producto"
+                                        required
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label for="precio_producto">Precio:</label>
+                                    <input
+                                        type="number"
+                                        class="form-control"
+                                        id="precio_producto"
+                                        name="precio_producto"
+                                        step="0.01"
+                                        required
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label for="imagen_producto">URL de la imagen:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="imagen_producto"
+                                        name="imagen_producto"
+                                        required
+                                    />
+                                </div>
+                                <button type="submit" class="btn btn-primary">Agregar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="modal-body">
-              <!-- Formulario para agregar un nuevo producto -->
-              <form method="POST" action="{{ url_for('insertar') }}">
-                <div class="form-group">
-                  <label for="id_producto">ID Producto:</label>
-                  <input
-                    type="number"
-                    class="form-control"
-                    id="id_producto"
-                    name="id_producto"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="nombre_producto">Nombre:</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="nombre_producto"
-                    name="nombre_producto"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="marca_producto">Marca:</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="marca_producto"
-                    name="marca_producto"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="color_producto">Color:</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="color_producto"
-                    name="color_producto"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="precio_producto">Precio:</label>
-                  <input
-                    type="number"
-                    class="form-control"
-                    id="precio_producto"
-                    name="precio_producto"
-                    step="0.01"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="imagen_producto">URL de la imagen:</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="imagen_producto"
-                    name="imagen_producto"
-                    required
-                  />
-                </div>
-                <button type="submit" class="btn btn-primary">Agregar</button>
-              </form>
-            </div>
-          </div>
+
+            <hr />
+
+            <!-- Tabla de productos -->
+            <h3>Lista de Productos</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Marca</th>
+                        <th>Color</th>
+                        <th>Precio</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos %}
+                    <tr>
+                        <td>{{ producto.id_producto }}</td>
+                        <td>{{ producto.nombre_producto }}</td>
+                        <td>{{ producto.marca_producto }}</td>
+                        <td>{{ producto.color_producto }}</td>
+                        <td>{{ producto.precio_producto }}</td>
+                        <td>
+                            <a
+                                href="{{ url_for('modificar', id_producto=producto.id_producto) }}"
+                                class="btn btn-primary"
+                                >Actualizar</a
+                            >
+                            <form
+                                method="POST"
+                                action="{{ url_for('eliminar', id_producto=producto.id_producto) }}"
+                                style="display: inline"
+                            >
+                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-      </div>
 
-      <hr />
-
-      <!-- Tabla de productos -->
-      <h3>Lista de Productos</h3>
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Marca</th>
-            <th>Color</th>
-            <th>Precio</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for producto in productos %}
-          <tr>
-            <td>{{ producto.id_producto }}</td>
-            <td>{{ producto.nombre_producto }}</td>
-            <td>{{ producto.marca_producto }}</td>
-            <td>{{ producto.color_producto }}</td>
-            <td>{{ producto.precio_producto }}</td>
-            <td>
-              <a
-                href="{{ url_for('modificar', id_producto=producto.id_producto) }}"
-                class="btn btn-primary"
-                >Actualizar</a
-              >
-              <form
-                method="POST"
-                action="{{ url_for('eliminar', id_producto=producto.id_producto) }}"
-                style="display: inline"
-              >
-                <button type="submit" class="btn btn-danger">Eliminar</button>
-              </form>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Agrega el script de Bootstrap y jQuery -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
-  </body>
+        <!-- Agrega el script de Bootstrap y jQuery -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    </body>
 </html>
 
 <!-- Agrega el script de Bootstrap y jQuery -->
