@@ -18,8 +18,7 @@ class Producto:
 
 
 class Usuario:
-    def __init__(self, id_usuario, nombre_completo, correo, password, tipo_usuario):
-        self.id_usuario = id_usuario
+    def __init__(self, nombre_completo, correo, password, tipo_usuario):
         self.nombre_completo = nombre_completo
         self.correo = correo
         self.password = password

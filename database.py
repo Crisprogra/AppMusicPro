@@ -48,14 +48,14 @@ def create_table_usuario():
             cursor.execute(
                 """
                 CREATE TABLE IF NOT EXISTS usuario (
-                    id_usuario INT PRIMARY KEY,
+                    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
                     nombre_completo VARCHAR(255),
                     correo VARCHAR(255),
                     password VARCHAR(255),
                     tipo_usuario INT,
                     FOREIGN KEY (tipo_usuario) REFERENCES tipo_usuario(id_tipo_usuario)
                 )
-            """
+                """
             )
             print("Tabla usuario creada exitosamente.")
 
@@ -504,3 +504,45 @@ def obtener_nombre_usuario(email):
         return result[0]
     else:
         return None
+
+
+def obtener_tipo_usuario(email):
+    connection = mysql.connector.connect(
+        host="localhost", user="root", password="password", database="musicprodb"
+    )
+    cursor = connection.cursor()
+    cursor.execute("SELECT tipo_usuario FROM usuario WHERE correo = %s", (email,))
+    result = cursor.fetchone()
+    cursor.close()
+
+    if result:
+        return result[0]
+    else:
+        return None
+
+
+def add_usuario(usuario):
+    try:
+        connection = mysql.connector.connect(
+            host="localhost", user="root", password="password", database="musicprodb"
+        )
+        cursor = connection.cursor()
+
+        query = """
+        INSERT INTO usuario (nombre_completo, correo, password, tipo_usuario)
+        VALUES (%s, %s, %s, %s)
+        """
+        values = (
+            usuario.nombre_completo,
+            usuario.correo,
+            usuario.password,
+            usuario.tipo_usuario,
+        )
+        cursor.execute(query, values)
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+
+    except mysql.connector.Error as error:
+        print("Error al agregar un usuario:", error)

@@ -32,11 +32,11 @@ VALUES
   (3, 'contador'),
   (4, 'cliente');
 
-  INSERT INTO usuario (id_usuario, nombre_completo, correo, password, tipo_usuario)
+INSERT INTO usuario (nombre_completo, correo, password, tipo_usuario)
 VALUES
-  (1, 'vendedor1', 'vendedor1@test.com', 'testvendedor', 4),
-  (2, 'vendedor2', 'vendedor2@test.com', 'testvendedor', 4),
-  (3, 'cliente1', 'cliente1@test.com', 'testcliente', 3),
-  (4, 'cliente2', 'cliente2@test.com', 'testcliente', 3),
-  (5, 'bodeguero1', 'bodeguero1@test.com', 'testbodeguero', 2),
-  (6, 'contador1', 'contador1@test.com', 'testcontador', 1);
+  ('vendedor1', 'vendedor1@test.com', 'testvendedor', 1),
+  ('vendedor2', 'vendedor2@test.com', 'testvendedor', 1),
+  ('cliente1', 'cliente1@test.com', 'testcliente', 4),
+  ('cliente2', 'cliente2@test.com', 'testcliente', 4),
+  ('bodeguero1', 'bodeguero1@test.com', 'testbodeguero', 2),
+  ('contador1', 'contador1@test.com', 'testcontador', 3);
