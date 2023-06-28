@@ -7,7 +7,7 @@
             content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
         />
         <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-        <title>mmerce Template</title>
+        <title>Music Pro</title>
 
         <link href="//fonts.googleapis.com/css?family=Righteous" rel="stylesheet" />
         <link href="//fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300i,700" rel="stylesheet" />
@@ -66,7 +66,9 @@
                                 <div class="col-auto">
                                     <ul class="top-nav">
                                         <li>
-                                            <a href="register.html"><i class="fas fa-user-edit me-2"></i>Registro</a>
+                                            <a href="{{ url_for('registrar_usuario') }}"
+                                                ><i class="fas fa-user-edit me-2"></i>Registro</a
+                                            >
                                         </li>
                                         <li>
                                             <a href="{{ url_for('login') }}">
@@ -110,10 +112,9 @@
                                         <i class="fas fa-heart me-2"></i><span id="header-favorite"></span>
                                     </a>
                                     <a href="{{ url_for('carrito') }}" class="header-item">
-                                        <i class="fas fa-shopping-bag me-2"></i
-                                        ><span id="header-qty" class="me-3"></span>
-
-                                        <i class="bi bi-cart"> </i><span id="header-price">Carrito de compras</span>
+                                        <i class="fa fa-shopping-bag me-2"></i
+                                        ><span id="header-qty" class="me-3"></span> <i class="bi bi-cart"></i
+                                        ><span id="header-price">Carrito de compras</span>
                                     </a>
                                 </div>
                             </div>

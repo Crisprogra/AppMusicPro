@@ -9,8 +9,9 @@ from flask import (
     redirect,
     flash,
 )
-from models import Producto
+from models import Producto, Usuario
 from database import (
+    add_usuario,
     create_product_table,
     add_producto,
     get_productos,
@@ -102,9 +103,12 @@ def verificar_autorizacion(func):
 @app.route("/mantenedor")
 @verificar_autorizacion
 def mostrar_mantenedor():
+    nombre_usuario = session.get("usuario", "")
     # Código para obtener la lista de productos para el mantenedor
     productos = get_productos()
-    return render_template("mantenedor.html", productos=productos)
+    return render_template(
+        "mantenedor.html", productos=productos, nombre_usuario=nombre_usuario
+    )
 
 
 @app.route("/acceso-no-autorizado")
@@ -403,6 +407,21 @@ def login():
             )
     # Mostrar el formulario de inicio de sesión
     return render_template("login.html")
+
+
+@app.route("/registrar_usuario", methods=["GET", "POST"])
+def registrar_usuario():
+    if request.method == "POST":
+        nombre_completo = request.form["nombre_completo"]
+        correo = request.form["correo"]
+        password = request.form["password"]
+
+        usuario = Usuario(
+            nombre_completo, correo, password, 4
+        )  # tipo_usuario siempre es 4
+        add_usuario(usuario)
+        return redirect(url_for("login"))
+    return render_template("registro.html")
 
 
 @app.route("/logout")
