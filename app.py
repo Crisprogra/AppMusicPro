@@ -15,6 +15,7 @@ from database import (
     add_producto,
     get_productos,
     obtener_nombre_usuario,
+    obtener_tipo_usuario,
     obtener_usuario_contraseña,
     update_producto,
     delete_producto,
@@ -32,6 +33,7 @@ import requests
 import random
 import string
 import re
+from functools import wraps
 
 # from transbank.webpay.webpay_plus.transaction import Transaction
 # from transbank.error.transbank_error import TransbankError
@@ -71,21 +73,44 @@ def mostrar_productos():
     carrito = session.get("carrito", {})
     nombre_usuario = session.get("usuario", "")
     monto_total = session.get("monto_total", "")
+    tipo_usuario = session.get("tipo_usuario", "")
     return render_template(
         "index.html",
         productos=productos,
         carrito=carrito,
         nombre_usuario=nombre_usuario,
         monto_total=monto_total,
+        tipo_usuario=tipo_usuario,
     )
 
 
 # Ruta para mostrar  catalogo al mantenedor
+def verificar_autorizacion(func):
+    @wraps(func)
+    def decorador(*args, **kwargs):
+        tipo_usuario = session.get("tipo_usuario")
+
+        if tipo_usuario not in [1, 2, 3]:
+            # Redirigir a una página de acceso no autorizado
+            return redirect(url_for("acceso_no_autorizado"))
+
+        return func(*args, **kwargs)
+
+    return decorador
+
+
 @app.route("/mantenedor")
+@verificar_autorizacion
 def mostrar_mantenedor():
     # Código para obtener la lista de productos para el mantenedor
     productos = get_productos()
     return render_template("mantenedor.html", productos=productos)
+
+
+@app.route("/acceso-no-autorizado")
+def acceso_no_autorizado():
+    # Página de acceso no autorizado
+    return render_template("acceso-no-autorizado.html")
 
 
 # Ruta para insertar un producto
@@ -360,9 +385,14 @@ def login():
         # Verificar las credenciales del usuario
         if password == stored_password:
             session["usuario"] = obtener_nombre_usuario(email)
+            session["tipo_usuario"] = obtener_tipo_usuario(email)
             # Redirigir a la vista mostrar_productos con el nombre de usuario como parámetro
             return redirect(
-                url_for("mostrar_productos", nombre_usuario=session["usuario"])
+                url_for(
+                    "mostrar_productos",
+                    nombre_usuario=session["usuario"],
+                    tipo_usuario=session["tipo_usuario"],
+                )
             )
         else:
             flash("Inicio de sesión fallido. Verifica tus credenciales.")

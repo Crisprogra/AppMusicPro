@@ -504,3 +504,18 @@ def obtener_nombre_usuario(email):
         return result[0]
     else:
         return None
+
+
+def obtener_tipo_usuario(email):
+    connection = mysql.connector.connect(
+        host="localhost", user="root", password="password", database="musicprodb"
+    )
+    cursor = connection.cursor()
+    cursor.execute("SELECT tipo_usuario FROM usuario WHERE correo = %s", (email,))
+    result = cursor.fetchone()
+    cursor.close()
+
+    if result:
+        return result[0]
+    else:
+        return None
