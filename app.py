@@ -11,6 +11,9 @@ from datetime import datetime
 from transbank.webpay.webpay_plus.transaction import Transaction
 from transbank.error.transbank_error import TransbankError
 from uuid import uuid4  # Importar la función uuid4 para generar un session_id único
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from flask import make_response
 
 app = Flask(__name__)
 app.secret_key = '123'
@@ -263,8 +266,71 @@ def generar_id_factura():
     id_factura = f"FA{nuevo_id_factura}"
 
     return id_factura
+# Funcion para fenerar un pdf de la factura para cliente
 
-# Ruta para el retorno desde Transbank y generación de facturas
+def generar_boleta_pdf(factura):
+    # Crear un nuevo archivo PDF en memoria
+    pdf_buffer = BytesIO()
+
+    # Crear el canvas para el PDF
+    c = canvas.Canvas(pdf_buffer)
+
+    # Agregar contenido al PDF
+    c.setFont("Helvetica", 12)
+    c.drawString(50, 800, "Boleta Cliente")
+    c.drawString(50, 750, f"ID Factura: {factura['id_factura']}")
+    c.drawString(50, 700, f"Buy Order: {factura['buy_order']}")
+    c.drawString(50, 650, f"Session ID: {factura['session_id']}")
+    c.drawString(50, 600, f"Monto Total: {factura['monto_total']}")
+    c.drawString(50, 550, f"Fecha Emisión: {factura['fecha']}")
+
+    # Dibujar la tabla de productos
+    table_data = [
+        ["Producto", "Cantidad", "Precio Unitario"],
+    ]
+    for producto in factura['productos_carrito']:
+        table_data.append([producto['nombre'], producto['cantidad'], producto['precio']])
+    
+    c.setFillColorRGB(0.2, 0.2, 0.2)
+    c.setFont("Helvetica-Bold", 12)
+    row_height = 30
+    x = 50
+    y = 500
+    for row in table_data:
+        for item in row:
+            c.drawString(x, y, str(item))
+            x += 150
+        y -= row_height
+        x = 50
+    
+    # Guardar el PDF y finalizar el canvas
+    c.save()
+
+    return pdf_buffer
+
+# Ruta para descargar el PDF
+@app.route('/descargar-pdf', methods=['GET'])
+def descargar_pdf():
+    # Obtener factura_cliente de la sesión
+    factura_cliente = session.get('factura_cliente')
+
+    if factura_cliente:
+        # Generar el archivo PDF de la boleta del cliente
+        pdf_buffer = generar_boleta_pdf(factura_cliente)
+
+        # Crear una respuesta HTTP con el archivo PDF como contenido adjunto
+        response = make_response(pdf_buffer.getvalue())
+        response.headers['Content-Disposition'] = 'attachment; filename=boleta_cliente.pdf'
+        response.headers['Content-Type'] = 'application/pdf'
+
+        # Eliminar el archivo PDF temporal
+        pdf_buffer.close()
+
+        return response
+
+    # Si no se encuentra factura_cliente en la sesión, redirigir a una página de error
+    return render_template('error.html')
+
 # Ruta para el retorno desde Transbank y generación de facturas
 @app.route('/retorno-transbank', methods=['POST'])
 def retorno_transbank():
@@ -332,14 +398,42 @@ def retorno_transbank():
             
         }
 
+
+
         # Llamar a la función para guardar la factura de la bodega en la base de datos
         guardar_factura_bodega(factura_bodega)
 
+        # Generar boleta para el cliente
+        factura_cliente = {
+            'id_factura': id_factura,
+            'fecha': fecha,
+            'buy_order': buy_order,
+            'session_id': session_id,
+            'productos_carrito': productos_carrito,
+            'monto_total': monto_total
+        }
+
+        # Guardar factura_cliente en la sesión
+        session['factura_cliente'] = factura_cliente
+
+        # Generar el archivo PDF de la boleta del cliente
+        pdf_buffer = generar_boleta_pdf(factura_cliente)
+
+        # Crear una respuesta HTTP con el archivo PDF como contenido adjunto
+        response = make_response(pdf_buffer.getvalue())
+        response.headers['Content-Disposition'] = 'attachment; filename=boleta_cliente.pdf'
+        response.headers['Content-Type'] = 'application/pdf'
+
+        # Eliminar el archivo PDF temporal
+        pdf_buffer.close()
+
         # Redirigir a la página de éxito o mostrar un mensaje de confirmación
-        return render_template('exito.html')
+        return render_template('factura_cliente.html', facturas=[factura_cliente], pdf_response=response)
 
     # Si el carrito o los datos requeridos no están presentes, redirigir a una página de error
     return render_template('error.html')
+
+
 
 # Función para renderizar las facturas de contador
 @app.route('/facturas-contador')
@@ -351,7 +445,7 @@ def renderizar_facturas_contador():
 @app.route('/facturas-bodega')
 def renderizar_facturas_bodega():
     facturas_bodega = obtener_todas_facturas_bodega()
-    return render_template('facturas_bodega.html', facturas=facturas_bodega)
+    return render_template('facturas_bodega.html',facturas=facturas_bodega)
 
 
 
