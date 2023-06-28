@@ -1,0 +1,65 @@
+{% extends 'index.html' %} {% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-8">
+            <div class="card mt-5">
+                <div class="card-body">
+                    <h1 class="text-center">Pago Exitoso!</h1>
+                    <br />
+                    <br />
+                    <h2 class="text-center">Boleta Cliente</h2>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID Factura</th>
+                                <th>Buy Order</th>
+                                <th>Session ID</th>
+                                <th>Monto Total</th>
+                                <th>Fecha Emisión</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for factura in facturas %}
+                            <tr>
+                                <td>{{ factura['id_factura'] }}</td>
+                                <td>{{ factura['buy_order'] }}</td>
+                                <td>{{ factura['session_id'] }}</td>
+                                <td>{{ factura['monto_total'] }}</td>
+                                <td>{{ factura['fecha'] }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="5">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Producto</th>
+                                                <th>Cantidad</th>
+                                                <th>Precio Unitario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for producto in factura['productos_carrito'] %}
+                                            <tr>
+                                                <td>{{ producto['nombre'] }}</td>
+                                                <td>{{ producto['cantidad'] }}</td>
+                                                <td>{{ producto['precio'] }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <!-- Agregar enlace de descarga del PDF -->
+                    <p class="text-center">
+                        <a href="{{ url_for('descargar_pdf') }}" class="btn btn-primary">Descargar PDF</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

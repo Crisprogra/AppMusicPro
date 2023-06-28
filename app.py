@@ -32,11 +32,19 @@ import requests
 import random
 import string
 import re
-from datetime import datetime
 
 # from transbank.webpay.webpay_plus.transaction import Transaction
 # from transbank.error.transbank_error import TransbankError
-from uuid import uuid4  # Im
+from uuid import uuid4  # Importar la función uuid4 para generar un session_id único
+from io import BytesIO
+
+from datetime import datetime
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.pdfgen import canvas
+from flask import make_response
 
 app = Flask(__name__)
 app.secret_key = "123"
@@ -405,8 +413,109 @@ def generar_id_factura():
     return id_factura
 
 
+# Funcion para fenerar un pdf de la factura para cliente
+
+
+def generar_boleta_pdf(factura):
+    # Crear un nuevo archivo PDF en memoria
+    pdf_buffer = BytesIO()
+
+    # Configurar el estilo del documento
+    doc = SimpleDocTemplate(pdf_buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+
+    # Crear los elementos del contenido del PDF
+    elementos = []
+
+    # Título de la boleta
+    titulo = Paragraph("<b>Boleta Cliente</b>", styles["Heading1"])
+    elementos.append(titulo)
+    elementos.append(Paragraph("<br/><br/>", styles["Normal"]))
+
+    # Datos de la factura
+    datos_factura = [
+        ["ID Factura:", factura["id_factura"]],
+        ["Buy Order:", factura["buy_order"]],
+        ["Session ID:", factura["session_id"]],
+        ["Monto Total:", factura["monto_total"]],
+        ["Fecha Emisión:", factura["fecha"]],
+    ]
+    tabla_factura = Table(datos_factura, colWidths=[100, 300])
+    tabla_factura.setStyle(
+        TableStyle(
+            [
+                ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 12),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ]
+        )
+    )
+    elementos.append(tabla_factura)
+    elementos.append(Paragraph("<br/><br/>", styles["Normal"]))
+
+    # Tabla de productos
+    encabezados = ["Producto", "Cantidad", "Precio Unitario"]
+    datos_productos = [encabezados] + [
+        [producto["nombre"], producto["cantidad"], producto["precio"]]
+        for producto in factura["productos_carrito"]
+    ]
+    tabla_productos = Table(datos_productos, colWidths=[200, 100, 100])
+    tabla_productos.setStyle(
+        TableStyle(
+            [
+                ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 10),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.gray),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.black),
+                ("BOX", (0, 0), (-1, -1), 0.25, colors.black),
+            ]
+        )
+    )
+    elementos.append(tabla_productos)
+
+    # Agregar el texto "Music Master Pro" en la esquina
+    elementos.append(Spacer(1, 60))
+    elementos.append(
+        Paragraph("<font size=8>Music Master Pro</font>", styles["Normal"])
+    )
+
+    # Generar el PDF
+    doc.build(elementos)
+
+    return pdf_buffer
+
+
+# Ruta para descargar el PDF
+@app.route("/descargar-pdf", methods=["GET"])
+def descargar_pdf():
+    # Obtener factura_cliente de la sesión
+    factura_cliente = session.get("factura_cliente")
+
+    if factura_cliente:
+        # Generar el archivo PDF de la boleta del cliente
+        pdf_buffer = generar_boleta_pdf(factura_cliente)
+
+        # Crear una respuesta HTTP con el archivo PDF como contenido adjunto
+        response = make_response(pdf_buffer.getvalue())
+        response.headers[
+            "Content-Disposition"
+        ] = "attachment; filename=boleta_cliente.pdf"
+        response.headers["Content-Type"] = "application/pdf"
+
+        # Eliminar el archivo PDF temporal
+        pdf_buffer.close()
+
+        return response
+
+    # Si no se encuentra factura_cliente en la sesión, redirigir a una página de error
+    return render_template("error.html")
+
+
 # Ruta para el retorno desde Transbank y generación de facturas
-@app.route("/retorno-transbank", methods=["GET", "POST"])
+@app.route("/retorno-transbank", methods=["POST"])
 def retorno_transbank():
     # Simulación de retorno desde Transbank y ejecución de la generación de facturas
     # Aquí se realizarían las operaciones necesarias para obtener los datos de la transacción
@@ -473,8 +582,36 @@ def retorno_transbank():
         # Llamar a la función para guardar la factura de la bodega en la base de datos
         guardar_factura_bodega(factura_bodega)
 
+        # Generar boleta para el cliente
+        factura_cliente = {
+            "id_factura": id_factura,
+            "fecha": fecha,
+            "buy_order": buy_order,
+            "session_id": session_id,
+            "productos_carrito": productos_carrito,
+            "monto_total": monto_total,
+        }
+
+        # Guardar factura_cliente en la sesión
+        session["factura_cliente"] = factura_cliente
+
+        # Generar el archivo PDF de la boleta del cliente
+        pdf_buffer = generar_boleta_pdf(factura_cliente)
+
+        # Crear una respuesta HTTP con el archivo PDF como contenido adjunto
+        response = make_response(pdf_buffer.getvalue())
+        response.headers[
+            "Content-Disposition"
+        ] = "attachment; filename=boleta_cliente.pdf"
+        response.headers["Content-Type"] = "application/pdf"
+
+        # Eliminar el archivo PDF temporal
+        pdf_buffer.close()
+
         # Redirigir a la página de éxito o mostrar un mensaje de confirmación
-        return render_template("exito.html")
+        return render_template(
+            "factura_cliente.html", facturas=[factura_cliente], pdf_response=response
+        )
 
     # Si el carrito o los datos requeridos no están presentes, redirigir a una página de error
     return render_template("error.html")

@@ -1,58 +1,58 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Buscar Producto</title>
-    <!-- Agrega los enlaces a los estilos de Bootstrap -->
-    <link rel="styles" href="../static/styles.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container">
-        <h1>Buscar Producto</h1>
+    <head>
+        <title>Buscar Producto</title>
+        <!-- Agrega los enlaces a los estilos de Bootstrap -->
+        <link rel="styles" href="../static/styles.css" />
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0/css/bootstrap.min.css" />
+    </head>
+    <body>
+        <div class="container">
+            <h1>Buscar Producto</h1>
 
-        <!-- Formulario para buscar producto por ID -->
-        <form method="GET" action="{{ url_for('obtener_producto') }}">
-            <div class="form-group">
-                <label for="id_producto">ID Producto:</label>
-                <input type="text" class="form-control" id="id_producto" name="id_producto" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Buscar</button>
-        </form>
+            <!-- Formulario para buscar producto por ID -->
+            <form method="GET" action="{{ url_for('obtener_producto') }}">
+                <div class="form-group">
+                    <label for="id_producto">ID Producto:</label>
+                    <input type="text" class="form-control" id="id_producto" name="id_producto" required />
+                </div>
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            </form>
 
-        <hr>
+            <hr />
 
-        <!-- Tabla para mostrar el producto -->
-        <h3>Información del Producto</h3>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Marca</th>
-                    <th>Color</th>
-                    <th>Precio</th>
-                    <th>Imagen</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if producto %}
+            <!-- Tabla para mostrar el producto -->
+            <h3>Información del Producto</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Marca</th>
+                        <th>Color</th>
+                        <th>Precio</th>
+                        <th>Imagen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if producto %}
                     <tr>
                         <td>{{ producto.id_producto }}</td>
                         <td>{{ producto.nombre_producto }}</td>
                         <td>{{ producto.marca_producto }}</td>
                         <td>{{ producto.color_producto }}</td>
                         <td>{{ producto.precio_producto }}</td>
-                        <td><img src="{{ producto.imagen_producto }}" alt="Imagen del Producto"></td>
+                        <td><img src="{{ producto.imagen_producto }}" alt="Imagen del Producto" /></td>
                     </tr>
-                {% else %}
+                    {% else %}
                     <tr>
                         <td colspan="6">Producto no encontrado</td>
                     </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
-     <!-- Agrega el script de JavaScript -->
-     <script src="../static/scripts.js"></script>
-</body>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        <!-- Agrega el script de JavaScript -->
+        <script src="../static/scripts.js"></script>
+    </body>
 </html>
