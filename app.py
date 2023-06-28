@@ -62,9 +62,7 @@ def mostrar_productos():
     productos = get_productos()
     carrito = session.get("carrito", {})
     nombre_usuario = session.get("usuario", "")
-    monto_total = session.get(
-        "monto_total", ""
-    )  # Obtener el nombre de usuario de la sesión
+    monto_total = session.get("monto_total", "")
     return render_template(
         "index.html",
         productos=productos,
@@ -228,11 +226,14 @@ def carrito():
         # Redirigir a una página de error o realizar alguna otra acción adecuada
         return render_template("error.html")
 
-    monto_total = sum(
-        float(str(producto.get("total", "0.00")).replace(",", "").replace(".", ""))
-        for producto in carrito.values()
-        if isinstance(producto, dict)
-        and isinstance(producto.get("total"), (int, float))
+    monto_total = round(
+        sum(
+            producto.get("total", 0.00)
+            for producto in carrito.values()
+            if isinstance(producto, dict)
+            and isinstance(producto.get("total"), (int, float))
+        ),
+        2,
     )
     session["monto_total"] = monto_total
     if request.method == "POST":
