@@ -1,7 +1,5 @@
-import json
 from flask import (
     Flask,
-    jsonify,
     render_template,
     request,
     session,
@@ -9,7 +7,7 @@ from flask import (
     redirect,
     flash,
 )
-from models import Producto, Usuario
+from models import Producto, ProductoAgregado, Usuario
 from database import (
     add_usuario,
     create_product_table,
@@ -28,28 +26,20 @@ from database import (
     obtener_todas_facturas_bodega,
     obtener_todas_facturas_contador,
 )
-from Api_Transbank import header_request_transbank
 from flask_mysqldb import MySQL
-import requests
-import random
-import string
-import re
 from functools import wraps
-
 # from transbank.webpay.webpay_plus.transaction import Transaction
 # from transbank.error.transbank_error import TransbankError
 from uuid import uuid4  # Importar la función uuid4 para generar un session_id único
 from io import BytesIO
-
 from datetime import datetime
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.pdfgen import canvas
 from flask import make_response
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static")
 app.secret_key = "123"
 # Transaction.commerce_code = "tu_codigo_de_comercio"
 # Transaction.api_key = "tu_llave_secreta"
@@ -60,6 +50,11 @@ app.config["MYSQL_USER"] = "root"
 app.config["MYSQL_PASSWORD"] = "password"
 app.config["MYSQL_DB"] = "musicprodb"
 
+
+# pagina 404
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("error.html"), 404
 
 # Función para establecer la conexión a la base de datos y seleccionar la base de datos
 def conectar_db():
@@ -85,7 +80,7 @@ def mostrar_productos():
     )
 
 
-# Ruta para mostrar  catalogo al mantenedor
+# Ruta para mostrar catalogo al mantenedor
 def verificar_autorizacion(func):
     @wraps(func)
     def decorador(*args, **kwargs):
@@ -111,6 +106,15 @@ def mostrar_mantenedor():
     )
 
 
+@app.route("/producto/<int:producto_id>")
+def vista_producto(producto_id):
+    nombre_usuario = session.get("usuario", "")
+    producto = get_producto_by_id(producto_id)
+    return render_template(
+        "producto.html", producto=producto, nombre_usuario=nombre_usuario
+    )
+
+
 @app.route("/acceso-no-autorizado")
 def acceso_no_autorizado():
     # Página de acceso no autorizado
@@ -121,15 +125,13 @@ def acceso_no_autorizado():
 @app.route("/insertar", methods=["GET", "POST"])
 def insertar():
     if request.method == "POST":
-        id_producto = request.form["id_producto"]
         nombre_producto = request.form["nombre_producto"]
         marca_producto = request.form["marca_producto"]
         color_producto = request.form["color_producto"]
         precio_producto = request.form["precio_producto"]
         imagen_producto = request.form["imagen_producto"]
 
-        producto = Producto(
-            id_producto,
+        producto = ProductoAgregado(
             nombre_producto,
             marca_producto,
             color_producto,
@@ -137,28 +139,38 @@ def insertar():
             imagen_producto,
         )
         add_producto(producto)
-        return "Producto insertado exitosamente en la base de datos."
-    return render_template("mantenedor.html", endpoint="insertar", action="Insertar")
+        flash("Producto agregado exitosamente.")
+        productos = get_productos()
+        return render_template(
+            "mantenedor.html",
+            endpoint="insertar",
+            action="Insertar",
+            flash_message="Producto agregado exitosamente.",
+            productos=productos,
+        )
+    return render_template(
+        "mantenedor.html", endpoint="insertar", action="Insertar", productos=productos
+    )
 
 
 # Ruta para mostrar la página de búsqueda por ID
-@app.route("/buscar")
-def buscar():
-    return render_template("buscar.html")
+# @app.route("/buscar")
+# def buscar():
+#     return render_template("buscar.html")
 
 
 # Ruta para obtener un producto por su ID
-@app.route("/producto", methods=["GET"])
-def obtener_producto():
-    id_producto = request.args.get("id_producto")
-    producto_data = get_producto_by_id(id_producto)
-    if producto_data:
-        producto = Producto(
-            *producto_data[1:]
-        )  # Crear objeto Producto con los valores de la tupla
-    else:
-        producto = None
-    return render_template("buscar.html", producto=producto)
+# @app.route("/producto", methods=["GET"])
+# def obtener_producto():
+#     id_producto = request.args.get("id_producto")
+#     producto_data = get_producto_by_id(id_producto)
+#     if producto_data:
+#         producto = Producto(
+#             *producto_data[1:]
+#         )  # Crear objeto Producto con los valores de la tupla
+#     else:
+#         producto = None
+#     return render_template("buscar.html", producto=producto)
 
 
 # Ruta para eliminar un producto
@@ -166,14 +178,20 @@ def obtener_producto():
 def eliminar(id_producto):
     if request.method == "POST":
         delete_producto(id_producto)
-        return "Producto eliminado exitosamente de la base de datos."
+        flash("Producto eliminado exitosamente de la base de datos")
+        productos = get_productos()
+        return render_template(
+            "mantenedor.html",
+            flash_message="Producto eliminado exitosamente de la base de datos",
+            productos=productos,
+        )
     return render_template("mantenedor.html")
 
 
 # Ruta para modificar un producto
 @app.route("/modificar/<int:id_producto>", methods=["GET", "POST"])
 def modificar(id_producto):
-    print(id_producto)
+    nombre_usuario = session.get("usuario", "")
     # Obtener el producto por su ID
     producto = get_producto_by_id(id_producto)
     if producto is None:
@@ -220,6 +238,7 @@ def modificar(id_producto):
                 endpoint="modificar",
                 action="Modificar",
                 error_message=error_message,
+                nombre_usuario=nombre_usuario,
             )
         else:
             # Actualizar el nombre del producto en el carrito si está presente
@@ -234,6 +253,7 @@ def modificar(id_producto):
                 "modificar.html",
                 success_message="Producto modificado exitosamente en la base de datos.",
                 producto=producto,
+                nombre_usuario=nombre_usuario,
             )
 
     return render_template(
@@ -247,6 +267,7 @@ def modificar(id_producto):
         producto=producto,
         endpoint="modificar",
         action="Modificar",
+        nombre_usuario=nombre_usuario,
     )
 
 
@@ -336,9 +357,15 @@ def agregar_al_carrito():
             "buy_order": buy_order,
             "session_id": session_id,
         }
-
+    flash("Se agrego el producto al carrito")
     session["carrito"] = carrito
-    return redirect(url_for("mostrar_productos"))
+    productos = get_productos()
+    return render_template(
+        "index.html",
+        flash_message="Se agrego el producto al carrito",
+        carrito=carrito,
+        productos=productos,
+    )
 
 
 # Ruta para actualizar cantidad del producto en el carrito
@@ -372,7 +399,6 @@ def eliminar_producto_carrito():
     if producto_id in carrito:
         del carrito[producto_id]
         session["carrito"] = carrito
-
     return redirect(url_for("carrito"))
 
 
@@ -420,8 +446,13 @@ def registrar_usuario():
             nombre_completo, correo, password, 4
         )  # tipo_usuario siempre es 4
         add_usuario(usuario)
-        return redirect(url_for("login"))
-    return render_template("registro.html")
+        flash("Registro exitoso, inicie sesión")
+        return render_template(
+            "login.html", flash_message="¡Registro exitoso!, puede iniciar sesión"
+        )
+    return render_template(
+        "registro.html", flash_message="Hubo un error, intentelo denuevo"
+    )
 
 
 @app.route("/logout")

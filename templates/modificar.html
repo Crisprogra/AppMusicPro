@@ -2,89 +2,92 @@
 {% extends 'index.html' %} {% block content %}
 <body>
     <h3>Modificar Producto</h3>
-
-    {% if error_message %}
-    <div class="alert alert-danger" role="alert">{{ error_message }}</div>
-    {% endif %} {% if success_message %}
-    <div class="alert alert-success" role="alert">{{ success_message }}</div>
-    {% endif %}
+    <div class="container">
+        {% if error_message %}
+        <div class="alert alert-danger" role="alert">{{ error_message }}</div>
+        {% endif %} {% if success_message %}
+        <div class="alert alert-success" role="alert">{{ success_message }}</div>
+        {% endif %}
+    </div>
 
     <form method="POST" action="{{ url_for('modificar', id_producto=producto.id_producto) }}">
-        <div class="form-group">
-            <label for="id_producto">ID Producto:</label>
-            <input
-                type="number"
-                class="form-control"
-                id="id_producto"
-                name="id_producto"
-                value="{{ producto.id_producto }}"
-                required
-                readonly
-            />
-        </div>
+        <div class="container">
+            <div class="form-group">
+                <label for="id_producto">ID Producto:</label>
+                <input
+                    type="number"
+                    class="form-control"
+                    id="id_producto"
+                    name="id_producto"
+                    value="{{ producto.id_producto }}"
+                    required
+                    readonly
+                />
+            </div>
 
-        <div class="form-group">
-            <label for="nombre_producto">Nombre:</label>
-            <input
-                type="text"
-                class="form-control"
-                id="nombre_producto"
-                name="nombre_producto"
-                value="{{ producto.nombre_producto }}"
-                required
-            />
-        </div>
+            <div class="form-group">
+                <label for="nombre_producto">Nombre:</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="nombre_producto"
+                    name="nombre_producto"
+                    value="{{ producto.nombre_producto }}"
+                    required
+                />
+            </div>
 
-        <div class="form-group">
-            <label for="marca_producto">Marca:</label>
-            <input
-                type="text"
-                class="form-control"
-                id="marca_producto"
-                name="marca_producto"
-                value="{{ producto.marca_producto }}"
-                required
-            />
-        </div>
+            <div class="form-group">
+                <label for="marca_producto">Marca:</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="marca_producto"
+                    name="marca_producto"
+                    value="{{ producto.marca_producto }}"
+                    required
+                />
+            </div>
 
-        <div class="form-group">
-            <label for="color_producto">Color:</label>
-            <input
-                type="text"
-                class="form-control"
-                id="color_producto"
-                name="color_producto"
-                value="{{ producto.color_producto }}"
-                required
-            />
-        </div>
+            <div class="form-group">
+                <label for="color_producto">Color:</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="color_producto"
+                    name="color_producto"
+                    value="{{ producto.color_producto }}"
+                    required
+                />
+            </div>
 
-        <div class="form-group">
-            <label for="precio_producto">Precio:</label>
-            <input
-                type="number"
-                class="form-control"
-                id="precio_producto"
-                name="precio_producto"
-                value="{{ producto.precio_producto }}"
-                step="0.01"
-                required
-            />
-        </div>
+            <div class="form-group">
+                <label for="precio_producto">Precio:</label>
+                <input
+                    type="number"
+                    class="form-control"
+                    id="precio_producto"
+                    name="precio_producto"
+                    value="{{ producto.precio_producto }}"
+                    step="0.01"
+                    required
+                />
+            </div>
 
-        <div class="form-group">
-            <label for="imagen_producto">URL de la imagen:</label>
-            <input
-                type="text"
-                class="form-control"
-                id="imagen_producto"
-                name="imagen_producto"
-                value="{{ producto.imagen_producto }}"
-                required
-            />
-        </div>
+            <div class="form-group">
+                <label for="imagen_producto">URL de la imagen:</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="imagen_producto"
+                    name="imagen_producto"
+                    value="{{ producto.imagen_producto }}"
+                    required
+                />
+            </div>
 
-        <button type="submit" class="btn btn-primary">{{ action }}</button>
+            <button type="submit" class="btn btn-primary mt-4">Actualizar</button>
+        </div>
     </form>
 </body>
 {% endblock %}

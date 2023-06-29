@@ -1,7 +1,6 @@
 import json
-from multiprocessing import connection
 import mysql.connector
-from models import Producto, Usuario, TipoUsuario, FacturaBodega, FacturaContador
+from models import Producto, FacturaBodega, FacturaContador
 import json
 
 

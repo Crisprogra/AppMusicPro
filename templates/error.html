@@ -1,12 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
     <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Document</title>
+        <title>Página no encontrada</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/css/bootstrap.min.css" />
+        <style>
+            body {
+                background-color: #f8f9fa;
+            }
+            .container {
+                margin-top: 100px;
+            }
+        </style>
     </head>
     <body>
-        <h1>404</h1>
+        <div class="container text-center">
+            <h1 class="display-4">Error 404</h1>
+            <p class="lead">Lo sentimos, la página que estás buscando no se encuentra disponible.</p>
+            <a href="{{ url_for('mostrar_productos') }}" class="btn btn-primary">Ir a la página de inicio</a>
+        </div>
+
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>
