@@ -13,9 +13,9 @@
         <link href="//fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300i,700" rel="stylesheet" />
         <link href="//fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i" rel="stylesheet" />
 
-        <link rel="stylesheet" href="static\css\bootstrap.min.css" />
-        <link rel="stylesheet" href="static\css\all.min.css" />
-        <link rel="stylesheet" href="static\css\style.css" />
+        <link rel="stylesheet" href="/static/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="/static/css/all.min.css" />
+        <link rel="stylesheet" href="/static/css/style.css" />
     </head>
     <body>
         <div class="container-fluid">
@@ -48,7 +48,7 @@
                                                 href="{{ url_for('mostrar_mantenedor') }}"
                                                 class="btn btn-warning"
                                                 style="color: black"
-                                                >Agregar productos a la pagina</a
+                                                >Mantenedor de productos</a
                                             >
                                             {% endif %}
                                         </li>
@@ -90,7 +90,7 @@
                                         <a href="{{ url_for('mostrar_productos') }}">Music-Pro</a>
                                     </div>
                                 </div>
-                                <div class="col-lg-5 mx-auto mt-4 mt-lg-0 mb-3">
+                                <div class="col-lg-5 mx-auto mt-lg">
                                     <form action="#">
                                         <div class="form-group">
                                             <div class="input-group">
@@ -108,13 +108,13 @@
                                     </form>
                                 </div>
                                 <div class="col-lg-auto text-center text-lg-left header-item-holder">
-                                    <a href="#" class="header-item">
-                                        <i class="fas fa-heart me-2"></i><span id="header-favorite"></span>
-                                    </a>
-                                    <a href="{{ url_for('carrito') }}" class="header-item">
-                                        <i class="fa fa-shopping-bag me-2"></i
-                                        ><span id="header-qty" class="me-3"></span> <i class="bi bi-cart"></i
-                                        ><span id="header-price">Carrito de compras</span>
+                                    <a href="{{ url_for('carrito') }}" class="header-item d-flex align-items-center">
+                                        <img
+                                            src="../static/images/icons8-productos-96.png"
+                                            alt="dinero"
+                                            class="img-fluid"
+                                        />
+                                        <span id="header-price" class="ml-2">Carrito de compras</span>
                                     </a>
                                 </div>
                             </div>
@@ -122,8 +122,13 @@
                         <!-- Header -->
                     </header>
                 </div>
-
-                {% block content %}
+                {% with messages = get_flashed_messages() %} {% if messages %}
+                <ul class="flash-messages text-center fs-3 btn-info">
+                    {% for message in messages %}
+                    <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %} {% endwith %} {% block content %}
                 <!-- Featured Products -->
                 <div class="col-12">
                     <div class="row">
@@ -140,10 +145,12 @@
                                     <div class="col-12 bg-white text-center h-100 product-item">
                                         <div class="row h-100">
                                             <div class="col-12 p-0 mb-3">
-                                                <a href="product.html">
+                                                <a
+                                                    href="{{ url_for('vista_producto', producto_id=producto.id_producto) }}"
+                                                >
                                                     <img
                                                         src="{{ producto.imagen_producto }}"
-                                                        class="img-fluid"
+                                                        class="img-fluid img-product"
                                                         alt="{{ producto.nombre_producto }}"
                                                     />
                                                 </a>
@@ -153,7 +160,11 @@
                                                 <p class="card-text">Marca: {{ producto.marca_producto }}</p>
                                                 <p class="card-text">Color: {{ producto.color_producto }}</p>
                                                 <p class="card-text">Precio: ${{ producto.precio_producto }}</p>
-                                                <a href="product.html" class="product-name">Sony Alpha DSLR Camera</a>
+                                                <a
+                                                    href="{{ url_for('vista_producto', producto_id=producto.id_producto) }}"
+                                                    class="product-name"
+                                                    >{{ producto.nombre_producto }}</a
+                                                >
                                             </div>
 
                                             <div class="col-12 mb-3">
@@ -174,7 +185,14 @@
                                                         value="{{ producto.precio_producto }}"
                                                     />
                                                     <button class="btn btn-outline-dark" type="submit">
-                                                        <i class="fas fa-cart-plus me-2"></i>Agregar al carrito
+                                                        <div class="col-auto">
+                                                            <img
+                                                                src="../static/images/icons8-agregar-a-carrito-de-compras-32.png"
+                                                                alt="dinero"
+                                                                class="img-fluid"
+                                                            />
+                                                        </div>
+                                                        Agregar al carrito
                                                     </button>
                                                 </form>
                                             </div>
@@ -197,27 +215,45 @@
                     <div class="col-12 py-3 bg-light d-sm-block d-none">
                         <div class="row">
                             <div class="col-lg-3 col ms-auto large-holder">
-                                <div class="row">
-                                    <div class="col-auto ms-auto large-icon">
-                                        <i class="fas fa-money-bill"></i>
+                                <div class="row justify-content-center align-items-center">
+                                    <div class="col-auto">
+                                        <img
+                                            src="../static/images/icons8-promedio-2-96.png"
+                                            alt="dinero"
+                                            class="img-fluid"
+                                        />
                                     </div>
-                                    <div class="col-auto me-auto large-text">El mejor precio</div>
+                                    <div class="col-auto">
+                                        <div class="ml-2 large-text">El mejor precio</div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-lg-3 col large-holder">
-                                <div class="row">
-                                    <div class="col-auto ms-auto large-icon">
-                                        <i class="fas fa-truck-moving"></i>
+                                <div class="row justify-content-center align-items-center">
+                                    <div class="col-auto">
+                                        <img
+                                            src="../static/images/icons8-entrega-96.png"
+                                            alt="dinero"
+                                            class="img-fluid"
+                                        />
                                     </div>
-                                    <div class="col-auto me-auto large-text">Delivery express</div>
+                                    <div class="col-auto">
+                                        <div class="ml-2 large-text">Delivery express</div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-lg-3 col me-auto large-holder">
-                                <div class="row">
-                                    <div class="col-auto ms-auto large-icon">
-                                        <i class="fas fa-check"></i>
+                                <div class="row justify-content-center align-items-center">
+                                    <div class="col-auto">
+                                        <img
+                                            src="../static/images/icons8-código-de-barras-96.png"
+                                            alt="dinero"
+                                            class="img-fluid"
+                                        />
                                     </div>
-                                    <div class="col-auto me-auto large-text">Productos originales</div>
+                                    <div class="col-auto">
+                                        <div class="ml-2 large-text">Productos originales</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
