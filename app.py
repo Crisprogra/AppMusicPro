@@ -38,6 +38,8 @@ from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from flask import make_response
+import requests
+import traceback
 
 app = Flask(__name__, static_folder="static")
 app.secret_key = "123"
@@ -593,6 +595,123 @@ def descargar_pdf():
     # Si no se encuentra factura_cliente en la sesión, redirigir a una página de error
     return render_template("error.html")
 
+def header_request_transbank():    
+    headers = {# DEFINICIÓN TIPO AUTORIZACIÓN Y AUTENTICACIÓN
+               "Authorization" : "Token",
+               # LLAVE QUE DEBE SER MODIFICADA PORQUE ES SOLO DEL AMBIENTE DE INTEGRACIÓN
+               "Tbk-Api-Key-Id" : "597055555532",
+               # LLAVE QUE DEBE SER MODIFICADA PORQUE ES SOLO DEL AMBIENTE DE INTEGRACIÓN               
+               "Tbk-Api-Key-Secret" : "579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C",
+               # DEFINICION DE TIPO DE INFORMACIÓN ENVIADA
+               "Content-Type" : "application/json"
+                }
+    return headers
+
+@app.route('/api/v1/transbank/transaction/create', methods= ['POST'])
+def transbank_create():
+    data = request.json
+    #  LECTURA DE PAYLOAD (BODY) CON INFORMACIÓN DE TIPO JSON
+    print('data: ', data)    
+    # DEFINICIÓN DE RUTA API REST TRANSBANK CREAR TRANSACCIÓN
+    url = 'https://webpay3gint.transbank.cl/rswebpaytransaction/api/webpay/v1.2/transactions'
+    headers = header_request_transbank()
+    response = requests.post(url, json=data, headers=headers)
+    print('response: ', response.json())
+    return response.json()    
+
+@app.route('/api/v1/transbank/transaction/commit/<string:tokenws>', methods= ['PUT'])
+def transbank_commit(tokenws):
+    print('tokenws: ', tokenws)
+    # DEFINICIÓN DE RUTA API REST TRANSBANK CREAR TRANSACCIÓN
+    url = 'https://webpay3gint.transbank.cl/rswebpaytransaction/api/webpay/v1.2/transactions/{token}'.format(token=tokenws)
+    headers = header_request_transbank()
+    response = requests.put(url, headers=headers)
+    print('response: ', response.json())
+    return response.json() 
+
+
+
+#Ruta para pagar e ir a transbank
+
+@app.route("/transbank-pay", methods=["GET", "POST"])
+def pagar():
+    # Verificar si la clave 'carrito' está presente en la sesión
+    if "carrito" in session:
+        carrito = session["carrito"]
+        # Obtener el buy_order y el session_id de la sesión
+        buy_order = session.get("buy_order")
+        session_id = session.get("session_id")
+
+        print("Session ID:", session_id)
+        print("Buy Order:", buy_order)
+        print("Productos del carrito:", carrito)
+
+        # Obtener los productos del carrito
+        productos_carrito = []
+        monto_total = 0.0
+        for producto_id, producto_info in carrito.items():
+            producto = {
+                "id": producto_id,
+                "nombre": producto_info["nombre"],
+                "precio": producto_info["precio"],
+                "cantidad": producto_info["cantidad"],
+                "total": producto_info["total"],
+            }
+            productos_carrito.append(producto)
+            monto_total += producto_info["total"]
+
+        print("Productos:", productos_carrito)
+        print("Monto total:", monto_total)
+
+                    
+        if request.method == 'GET':
+            buy_order = buy_order
+            amount = monto_total
+            context = {
+                'buy_order' : buy_order,
+                'amount' : amount
+            }
+            return render_template('transbank-pay.html', context=context)
+        elif request.method == 'POST':
+            print('request.method:' , request.method)
+            buy_order = session.get("buy_order")
+            amount = monto_total
+            session_id = session_id
+            return_url = 'http://127.0.0.1:9000/commit-pay'
+            body = {
+                'buy_order' : buy_order,
+                'amount' : amount,
+                'session_id': session_id,
+                'return_url' : return_url
+            }
+            print('body:', body)
+            url = 'http://127.0.0.1:8900/api/v1/transbank/transaction/create'
+            response = requests.post(url, json=body)
+            print('response:json: ', response.json())
+            context = {
+                'transbank': response.json(),
+                'amount' : amount
+            }
+            
+            return render_template('send-pay.html', context=context)
+
+@app.route('/commit-pay', methods = ['GET'])
+def tranbank_commit_view():  
+    token_ws = request.args.get('token_ws')
+    if token_ws is not None:
+        url = 'http://127.0.0.1:8900/api/v1/transbank/transaction/commit/{token}'.format(token=token_ws)
+        response = requests.put(url)  
+        print('response: ',response.json())          
+        context = {
+            'response' : response.json()
+        }
+        return render_template('commit-pay.html', context=context)                
+    else:
+        context = {
+            'message_error' : 'token inválido.'
+        }
+        return render_template('commit-pay.html', context=context)    
+    
 
 # Ruta para el retorno desde Transbank y generación de facturas
 @app.route("/retorno-transbank", methods=["POST"])
