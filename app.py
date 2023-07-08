@@ -39,7 +39,8 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet
 from flask import make_response
 import requests
-import traceback
+import traceback, os, requests
+from flask_cors import CORS
 
 app = Flask(__name__, static_folder="static")
 app.secret_key = "123"
@@ -51,6 +52,18 @@ app.config["MYSQL_HOST"] = "localhost"
 app.config["MYSQL_USER"] = "root"
 app.config["MYSQL_PASSWORD"] = "password"
 app.config["MYSQL_DB"] = "musicprodb"
+
+CORS(app)
+# SE HABILITA ACCESO PARA API DESDE EL ORIGEN *
+cors = CORS(app, resource={
+    #  RUTA O RUTAS HABILITADAS PARA SER CONSUMIDAS 
+    r"/api/v1/transbank/*":{
+        "origins":"*"
+    }
+})
+
+
+
 
 
 # pagina 404
@@ -596,19 +609,23 @@ def descargar_pdf():
     return render_template("error.html")
 
 def header_request_transbank():    
-    headers = {# DEFINICIÓN TIPO AUTORIZACIÓN Y AUTENTICACIÓN
-               "Authorization" : "Token",
-               # LLAVE QUE DEBE SER MODIFICADA PORQUE ES SOLO DEL AMBIENTE DE INTEGRACIÓN
-               "Tbk-Api-Key-Id" : "597055555532",
-               # LLAVE QUE DEBE SER MODIFICADA PORQUE ES SOLO DEL AMBIENTE DE INTEGRACIÓN               
-               "Tbk-Api-Key-Secret" : "579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C",
-               # DEFINICION DE TIPO DE INFORMACIÓN ENVIADA
-               "Content-Type" : "application/json"
-                }
+    headers = { # DEFINICIÓN TIPO DE AUTORIZACIÓN Y AUTENTICACIÓN
+                "Authorization": "Token",
+                # LLAVE QUE DEBE SER MODIFICADA PORQUE ES SOLO DEL AMBIENTE DE INTEGRACIÓN DE TRANSBANK (PRUEBAS)
+                "Tbk-Api-Key-Id": "597055555532",
+                # LLAVE QUE DEBE SER MODIFICADA PORQUE DEL AMBIENTE DE INTEGRACIÓN DE TRANSBANK (PRUEBAS)
+                "Tbk-Api-Key-Secret": "579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C",
+                # DEFINICIÓN DEL TIPO DE INFORMACIÓN ENVIADA
+                "Content-Type": "application/json",
+                # DEFINICIÓN DE RECURSOS COMPARTIDOS ENTRE DISTINTOS SERVIDORES PARA CUALQUIER MÁQUINA
+                "Access-Control-Allow-Origin": "*",
+                'Referrer-Policy': 'origin-when-cross-origin',
+                } 
     return headers
 
 @app.route('/api/v1/transbank/transaction/create', methods= ['POST'])
 def transbank_create():
+    print('headers: ', request.headers)
     data = request.json
     #  LECTURA DE PAYLOAD (BODY) CON INFORMACIÓN DE TIPO JSON
     print('data: ', data)    
@@ -618,6 +635,17 @@ def transbank_create():
     response = requests.post(url, json=data, headers=headers)
     print('response: ', response.json())
     return response.json()    
+
+
+
+
+
+
+
+
+
+
+
 
 @app.route('/api/v1/transbank/transaction/commit/<string:tokenws>', methods= ['PUT'])
 def transbank_commit(tokenws):
@@ -631,7 +659,9 @@ def transbank_commit(tokenws):
 
 
 
-#Ruta para pagar e ir a transbank
+# #Ruta para pagar e ir a transbank
+# API_REST_HOST = os.getenv('API_REST_HOST')
+# API_REST_PORT = os.getenv('API_REST_PORT')
 
 @app.route("/transbank-pay", methods=["GET", "POST"])
 def pagar():
@@ -666,7 +696,7 @@ def pagar():
                     
         if request.method == 'GET':
             buy_order = buy_order
-            amount = monto_total
+            amount = amount
             context = {
                 'buy_order' : buy_order,
                 'amount' : amount
@@ -677,7 +707,7 @@ def pagar():
             buy_order = session.get("buy_order")
             amount = monto_total
             session_id = session_id
-            return_url = 'http://127.0.0.1:9000/commit-pay'
+            return_url = 'http://127.0.0.1:5000/commit-pay'
             body = {
                 'buy_order' : buy_order,
                 'amount' : amount,
@@ -685,7 +715,7 @@ def pagar():
                 'return_url' : return_url
             }
             print('body:', body)
-            url = 'http://127.0.0.1:8900/api/v1/transbank/transaction/create'
+            url = 'http://127.0.0.1:5000/api/v1/transbank/transaction/create'
             response = requests.post(url, json=body)
             print('response:json: ', response.json())
             context = {
@@ -699,7 +729,7 @@ def pagar():
 def tranbank_commit_view():  
     token_ws = request.args.get('token_ws')
     if token_ws is not None:
-        url = 'http://127.0.0.1:8900/api/v1/transbank/transaction/commit/{token}'.format(token=token_ws)
+        url = 'http://127.0.0.1:5000/api/v1/transbank/transaction/commit/{token}'.format(token=token_ws)
         response = requests.put(url)  
         print('response: ',response.json())          
         context = {
