@@ -5,6 +5,7 @@ from flask import (
     session,
     url_for,
     redirect,
+     jsonify,
     flash,
 )
 from models import Producto, ProductoAgregado, Usuario
@@ -694,18 +695,21 @@ def pagar():
         print("Monto total:", monto_total)
 
                     
-        if request.method == 'GET':
+        dolar = int(obtener_valor_dolar())
+        if request.method == 'GET':     
             buy_order = buy_order
-            amount = amount
+            amount = int(amount * dolar)
+            print(amount)
             context = {
                 'buy_order' : buy_order,
                 'amount' : amount
             }
             return render_template('transbank-pay.html', context=context)
         elif request.method == 'POST':
+            
             print('request.method:' , request.method)
             buy_order = session.get("buy_order")
-            amount = monto_total
+            amount = int(monto_total * dolar)
             session_id = session_id
             return_url = 'http://127.0.0.1:5000/commit-pay'
             body = {
@@ -860,6 +864,17 @@ def renderizar_facturas_bodega():
     return render_template("facturas_bodega.html", facturas=facturas_bodega)
 
 
+def obtener_valor_dolar():
+    url = 'https://mindicador.cl/api/dolar'
+    response = requests.get(url)
+    data = response.json()
+    valor_dolar = data['serie'][0]['valor']
+    print(valor_dolar)
+    return valor_dolar
+
+
+
+
 if __name__ == "__main__":
     # Establecer la conexión a la base de datos y seleccionar la base de datos
     connection = conectar_db()
@@ -868,5 +883,5 @@ if __name__ == "__main__":
     create_product_table()
     create_table_tipo_usuario()
     create_table_usuario()
-
+    obtener_valor_dolar()
     app.run(debug=True)
