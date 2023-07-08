@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    {% if context.message_error %}
+    <div>{{context.message_error}}</div>
+    {% else %}
+    <div>{{context.response}}</div>
+    <table>
+      <tr>
+        <th>MONTO:</th>
+        <th>{{context.response.amount}}</th>
+      </tr>
+      <tr>
+        <th>N° TARJETA:</th>
+        <th>XXXX-XXXX-XXXX-{{context.response.card_detail.card_number}}</th>
+      </tr>
+      <tr>
+        <th>ESTADO:</th>
+        {% if context.response.status == 'AUTHORIZED' %}
+        <th>Autorizado.</th>
+        {% endif %}
+      </tr>
+      <tr>
+        <th>MEDIO DE PAGO:</th>
+        {% if context.response.payment_type_code == 'VD' %}
+        <th>TARJETA DE DÉBITO.</th>
+        {% endif %}
+      </tr>      
+      <tr>
+        <th>FECHA:</th>
+        <th>{{context.response.transaction_date}}</th>
+      </tr>
+
+    </table>
+
+    {% endif %}
+  </body>
+</html>
