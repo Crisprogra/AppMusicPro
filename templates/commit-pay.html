@@ -1,0 +1,38 @@
+{% extends 'index.html' %} {% block content %}
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <table class="table table-striped fs-5">
+                    <tr>
+                        <th class="header-cell">MONTO:</th>
+                        <td class="data-cell">
+                            <span class="currency-symbol">$</span>{{'{:,.0f}'.format(context.response.amount)}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="header-cell">N° TARJETA:</th>
+                        <td class="data-cell">XXXX-XXXX-XXXX-{{context.response.card_detail.card_number}}</td>
+                    </tr>
+                    <tr>
+                        <th class="header-cell">ESTADO:</th>
+                        {% if context.response.status == 'AUTHORIZED' %}
+                        <td class="data-cell text-success">Autorizado.</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        <th class="header-cell">MEDIO DE PAGO:</th>
+                        {% if context.response.payment_type_code == 'VD' %}
+                        <td class="data-cell">TARJETA DE DÉBITO.</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        <th class="header-cell">FECHA:</th>
+                        <td class="data-cell">{{context.response.transaction_date}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+{% endblock %}

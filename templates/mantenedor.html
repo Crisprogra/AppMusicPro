@@ -33,7 +33,7 @@
                         </div>
                         <div class="modal-body">
                             <!-- Formulario para agregar un nuevo producto -->
-                            <form method="POST" action="{{ url_for('insertar') }}">
+                            <form method="POST" action="{{ url_for('insertar') }}" enctype="multipart/form-data">
                                 <div class="form-group">
                                     <label for="nombre_producto">Nombre:</label>
                                     <input
@@ -76,10 +76,10 @@
                                     />
                                 </div>
                                 <div class="form-group">
-                                    <label for="imagen_producto">URL de la imagen:</label>
+                                    <label for="imagen_producto">Subir imagen:</label>
                                     <input
-                                        type="text"
-                                        class="form-control"
+                                        type="file"
+                                        class="form-control-file"
                                         id="imagen_producto"
                                         name="imagen_producto"
                                         required
@@ -139,6 +139,7 @@
         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+        <script async src="https://imgbb.com/upload.js"></script>
     </body>
 </html>
 
