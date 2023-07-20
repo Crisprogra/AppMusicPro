@@ -1,10 +1,11 @@
-blinker==1.6.2
+﻿blinker==1.6.2
 certifi==2023.5.7
 charset-normalizer==3.1.0
 click==8.1.3
 colorama==0.4.6
 docker==6.1.3
 Flask==2.3.2
+Flask-Cors==4.0.0
 Flask-MySQLdb==1.0.1
 Flask-SQLAlchemy==3.0.3
 greenlet==2.0.2
@@ -22,6 +23,7 @@ protobuf==3.20.3
 pywin32==306
 reportlab==4.0.4
 requests==2.31.0
+SQLAlchemy==2.0.18
 transbank-sdk==4.0.0
 typing_extensions==4.6.3
 urllib3==2.0.2
