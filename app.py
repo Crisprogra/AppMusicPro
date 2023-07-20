@@ -722,17 +722,22 @@ def pagar():
         elif request.method == "POST":
             print("request.method:", request.method)
             buy_order = session.get("buy_order")
+
+
             amount = int(monto_total * dolar)
             session_id = session_id
             return_url = "http://127.0.0.1:5000/commit-pay"
+
             body = {
                 "buy_order": buy_order,
                 "amount": amount,
                 "session_id": session_id,
                 "return_url": return_url,
             }
+
             print("body:", body)
             url = "http://127.0.0.1:5000/api/v1/transbank/transaction/create"
+
             response = requests.post(url, json=body)
             print("response:json: ", response.json())
             context = {"transbank": response.json(), "amount": amount}
@@ -904,5 +909,6 @@ if __name__ == "__main__":
     create_product_table()
     create_table_tipo_usuario()
     create_table_usuario()
+
     obtener_valor_dolar()
     app.run(debug=True)
