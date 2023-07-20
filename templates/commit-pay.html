@@ -1,44 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-  </head>
-  <body>
-    {% if context.message_error %}
-    <div>{{context.message_error}}</div>
-    {% else %}
-    <div>{{context.response}}</div>
-    <table>
-      <tr>
-        <th>MONTO:</th>
-        <th>{{context.response.amount}}</th>
-      </tr>
-      <tr>
-        <th>N° TARJETA:</th>
-        <th>XXXX-XXXX-XXXX-{{context.response.card_detail.card_number}}</th>
-      </tr>
-      <tr>
-        <th>ESTADO:</th>
-        {% if context.response.status == 'AUTHORIZED' %}
-        <th>Autorizado.</th>
-        {% endif %}
-      </tr>
-      <tr>
-        <th>MEDIO DE PAGO:</th>
-        {% if context.response.payment_type_code == 'VD' %}
-        <th>TARJETA DE DÉBITO.</th>
-        {% endif %}
-      </tr>      
-      <tr>
-        <th>FECHA:</th>
-        <th>{{context.response.transaction_date}}</th>
-      </tr>
 
-    </table>
+{% extends 'index.html' %} {% block content %}
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <table class="table table-striped fs-5">
+                    <tr>
+                        <th class="header-cell">MONTO:</th>
+                        <td class="data-cell">
+                            <span class="currency-symbol">$</span>{{'{:,.0f}'.format(context.response.amount)}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="header-cell">N° TARJETA:</th>
+                        <td class="data-cell">XXXX-XXXX-XXXX-{{context.response.card_detail.card_number}}</td>
+                    </tr>
+                    <tr>
+                        <th class="header-cell">ESTADO:</th>
+                        {% if context.response.status == 'AUTHORIZED' %}
+                        <td class="data-cell text-success">Autorizado.</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        <th class="header-cell">MEDIO DE PAGO:</th>
+                        {% if context.response.payment_type_code == 'VD' %}
+                        <td class="data-cell">TARJETA DE DÉBITO.</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        <th class="header-cell">FECHA:</th>
+                        <td class="data-cell">{{context.response.transaction_date}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+{% endblock %}
 
-    {% endif %}
-  </body>
-</html>
